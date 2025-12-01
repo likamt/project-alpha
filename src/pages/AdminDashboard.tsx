@@ -57,13 +57,16 @@ const AdminDashboard = () => {
         return;
       }
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
+      // التحقق من صلاحية المدير باستخدام النظام الآمن
+      const { data: isAdmin, error: roleError } = await supabase.rpc(
+        "has_role",
+        {
+          _user_id: session.user.id,
+          _role: "admin",
+        }
+      );
 
-      if (!profile || profile.role !== "admin") {
+      if (roleError || !isAdmin) {
         toast({
           title: "غير مصرح",
           description: "ليس لديك صلاحية الوصول إلى هذه الصفحة",
@@ -72,6 +75,13 @@ const AdminDashboard = () => {
         navigate("/");
         return;
       }
+
+      // تحميل الملف الشخصي
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single();
 
       setUserProfile(profile);
       loadDashboardData();
