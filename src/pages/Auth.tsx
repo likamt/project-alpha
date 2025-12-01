@@ -59,11 +59,20 @@ const Auth = () => {
             id: authData.user.id,
             full_name: fullName,
             phone: phone,
-            role: "client",
           },
         ]);
 
         if (profileError) throw profileError;
+
+        // إضافة دور العميل
+        const { error: roleError } = await supabase.from("user_roles").insert([
+          {
+            user_id: authData.user.id,
+            role: "client",
+          },
+        ]);
+
+        if (roleError) throw roleError;
 
         toast({
           title: "تم إنشاء الحساب بنجاح",
