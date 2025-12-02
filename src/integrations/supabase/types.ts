@@ -70,6 +70,59 @@ export type Database = {
           },
         ]
       }
+      house_workers: {
+        Row: {
+          availability: Json | null
+          completed_orders: number | null
+          created_at: string | null
+          description: string | null
+          hourly_rate: number
+          id: string
+          is_verified: boolean | null
+          location: string | null
+          rating: number | null
+          services: string[]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          description?: string | null
+          hourly_rate?: number
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          rating?: number | null
+          services?: string[]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          description?: string | null
+          hourly_rate?: number
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          rating?: number | null
+          services?: string[]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_workers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
@@ -303,7 +356,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "client" | "craftsman"
+      app_role: "admin" | "client" | "craftsman" | "house_worker"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -431,7 +484,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "client", "craftsman"],
+      app_role: ["admin", "client", "craftsman", "house_worker"],
     },
   },
 } as const
