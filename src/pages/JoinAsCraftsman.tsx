@@ -84,8 +84,17 @@ const JoinAsCraftsman = () => {
 
       if (error) throw error;
 
-      // تحديث role في profiles
-      await supabase.from("profiles").update({ role: "craftsman" }).eq("id", user.id);
+      // إضافة دور الحرفي في جدول الأدوار
+      const { error: roleError } = await supabase.from("user_roles").insert([
+        {
+          user_id: user.id,
+          role: "craftsman",
+        },
+      ]);
+
+      if (roleError) {
+        console.error("Error adding craftsman role:", roleError);
+      }
 
       toast({
         title: "تم التسجيل بنجاح!",
