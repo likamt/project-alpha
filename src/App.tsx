@@ -8,7 +8,9 @@ import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
 import JoinAsCraftsman from "./pages/JoinAsCraftsman";
+import JoinAsHouseWorker from "./pages/JoinAsHouseWorker";
 import HowItWorks from "./pages/HowItWorks";
+import HouseWorkers from "./pages/HouseWorkers";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +27,8 @@ const App = () => (
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/join" element={<JoinAsCraftsman />} />
+          <Route path="/join-house-worker" element={<JoinAsHouseWorker />} />
+          <Route path="/house-workers" element={<HouseWorkers />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

@@ -19,6 +19,8 @@ import {
   Paintbrush,
   Wind,
   Truck,
+  Home,
+  SparklesIcon as Sparkles,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -59,12 +61,12 @@ const Index = () => {
   };
 
   const services = [
-    { name: "سباكة", icon: Wrench, color: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300" },
-    { name: "كهرباء", icon: Zap, color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-300" },
-    { name: "نجارة", icon: Hammer, color: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300" },
-    { name: "دهان", icon: Paintbrush, color: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300" },
-    { name: "تكييف", icon: Wind, color: "bg-cyan-100 text-cyan-600 dark:bg-cyan-900 dark:text-cyan-300" },
-    { name: "نقل", icon: Truck, color: "bg-purple-100 text-purple-600 dark:bg-purple-900 dark:text-purple-300" },
+    { name: "سباكة", icon: Wrench, color: "bg-blue-100 text-blue-600 dark:bg-blue-900 dark:text-blue-300", path: "/craftsmen" },
+    { name: "كهرباء", icon: Zap, color: "bg-yellow-100 text-yellow-600 dark:bg-yellow-900 dark:text-yellow-300", path: "/craftsmen" },
+    { name: "نجارة", icon: Hammer, color: "bg-amber-100 text-amber-600 dark:bg-amber-900 dark:text-amber-300", path: "/craftsmen" },
+    { name: "دهان", icon: Paintbrush, color: "bg-green-100 text-green-600 dark:bg-green-900 dark:text-green-300", path: "/craftsmen" },
+    { name: "تنظيف منزلي", icon: Home, color: "bg-pink-100 text-pink-600 dark:bg-pink-900 dark:text-pink-300", path: "/house-workers" },
+    { name: "طبخ منزلي", icon: Sparkles, color: "bg-orange-100 text-orange-600 dark:bg-orange-900 dark:text-orange-300", path: "/house-workers" },
   ];
 
   const handleSearch = () => {
@@ -114,11 +116,18 @@ const Index = () => {
               </Button>
               <Button
                 size="lg"
+                className="bg-white/90 text-secondary hover:bg-white rounded-full px-8 shadow-lg"
+                onClick={() => navigate("/house-workers")}
+              >
+                عاملات منزلية
+              </Button>
+              <Button
+                size="lg"
                 variant="outline"
                 className="border-2 border-white text-white hover:bg-white/20 rounded-full px-8 backdrop-blur-sm"
                 onClick={() => navigate("/join")}
               >
-                انضم كحرفي
+                انضم معنا
               </Button>
             </div>
           </div>
@@ -163,7 +172,7 @@ const Index = () => {
                   key={index}
                   className="text-center hover:shadow-2xl hover:-translate-y-2 transition-all cursor-pointer group animate-scale-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
-                  onClick={() => navigate("/craftsmen")}
+                  onClick={() => navigate(service.path)}
                 >
                   <CardContent className="p-6">
                     <div className={`w-16 h-16 rounded-2xl ${service.color} flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform`}>

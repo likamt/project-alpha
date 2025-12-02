@@ -61,6 +61,7 @@ const Navbar = () => {
   const navLinks = [
     { name: "الرئيسية", path: "/" },
     { name: "الحرفيون", path: "/craftsmen" },
+    { name: "العاملات المنزلية", path: "/house-workers" },
     { name: "كيف يعمل", path: "/how-it-works" },
   ];
 
@@ -144,6 +145,12 @@ const Navbar = () => {
                   تسجيل الدخول
                 </Button>
                 <Button 
+                  variant="outline"
+                  onClick={() => navigate("/join-house-worker")}
+                >
+                  انضمي كعاملة
+                </Button>
+                <Button 
                   className="bg-gradient-primary hover:opacity-90"
                   onClick={() => navigate("/join")}
                 >
@@ -221,6 +228,16 @@ const Navbar = () => {
                   }}
                 >
                   تسجيل الدخول
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    navigate("/join-house-worker");
+                    setIsOpen(false);
+                  }}
+                >
+                  انضمي كعاملة
                 </Button>
                 <Button 
                   className="w-full bg-gradient-primary"
