@@ -62,6 +62,7 @@ const Navbar = () => {
     { name: "الرئيسية", path: "/" },
     { name: "الحرفيون", path: "/craftsmen" },
     { name: "العاملات المنزلية", path: "/house-workers" },
+    { name: "الطبخ المنزلي", path: "/home-cooking" },
     { name: "كيف يعمل", path: "/how-it-works" },
   ];
 
