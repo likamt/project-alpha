@@ -13,6 +13,8 @@ import JoinAsHomeCook from "./pages/JoinAsHomeCook";
 import HowItWorks from "./pages/HowItWorks";
 import HouseWorkers from "./pages/HouseWorkers";
 import HomeCooking from "./pages/HomeCooking";
+import HomeCookProfile from "./pages/HomeCookProfile";
+import Craftsmen from "./pages/Craftsmen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +35,8 @@ const App = () => (
           <Route path="/join-home-cook" element={<JoinAsHomeCook />} />
           <Route path="/house-workers" element={<HouseWorkers />} />
           <Route path="/home-cooking" element={<HomeCooking />} />
+          <Route path="/home-cook/:id" element={<HomeCookProfile />} />
+          <Route path="/craftsmen" element={<Craftsmen />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
