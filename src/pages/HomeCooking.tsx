@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -220,7 +221,10 @@ const HomeCooking = () => {
                       </div>
                       
                       {dish.cook?.profile && (
-                        <div className="flex items-center gap-2 mt-3 pt-3 border-t">
+                        <Link 
+                          to={`/home-cook/${dish.cook.id}`}
+                          className="flex items-center gap-2 mt-3 pt-3 border-t hover:bg-muted/50 -mx-2 px-2 py-2 rounded transition-colors"
+                        >
                           <div className="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center">
                             <ChefHat className="h-4 w-4 text-orange-500" />
                           </div>
@@ -233,7 +237,7 @@ const HomeCooking = () => {
                               </p>
                             )}
                           </div>
-                        </div>
+                        </Link>
                       )}
                     </CardContent>
                     
