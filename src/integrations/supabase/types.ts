@@ -70,6 +70,130 @@ export type Database = {
           },
         ]
       }
+      food_dishes: {
+        Row: {
+          category: string
+          cook_id: string
+          created_at: string | null
+          description: string | null
+          dietary_tags: string[] | null
+          id: string
+          image_url: string | null
+          ingredients: string[] | null
+          is_available: boolean | null
+          name: string
+          order_count: number | null
+          preparation_time_minutes: number | null
+          price: number
+          rating: number | null
+          servings: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          cook_id: string
+          created_at?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_available?: boolean | null
+          name: string
+          order_count?: number | null
+          preparation_time_minutes?: number | null
+          price: number
+          rating?: number | null
+          servings?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          cook_id?: string
+          created_at?: string | null
+          description?: string | null
+          dietary_tags?: string[] | null
+          id?: string
+          image_url?: string | null
+          ingredients?: string[] | null
+          is_available?: boolean | null
+          name?: string
+          order_count?: number | null
+          preparation_time_minutes?: number | null
+          price?: number
+          rating?: number | null
+          servings?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_dishes_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      home_cooks: {
+        Row: {
+          availability: Json | null
+          completed_orders: number | null
+          created_at: string | null
+          delivery_available: boolean | null
+          description: string | null
+          hourly_rate: number | null
+          id: string
+          is_verified: boolean | null
+          location: string | null
+          min_order_amount: number | null
+          rating: number | null
+          specialties: string[] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          min_order_amount?: number | null
+          rating?: number | null
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string
+          is_verified?: boolean | null
+          location?: string | null
+          min_order_amount?: number | null
+          rating?: number | null
+          specialties?: string[] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_cooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       house_workers: {
         Row: {
           availability: Json | null
@@ -356,7 +480,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "client" | "craftsman" | "house_worker"
+      app_role: "admin" | "client" | "craftsman" | "house_worker" | "home_cook"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -484,7 +608,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "client", "craftsman", "house_worker"],
+      app_role: ["admin", "client", "craftsman", "house_worker", "home_cook"],
     },
   },
 } as const
