@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ContactDialog from "@/components/ContactDialog";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -73,6 +74,7 @@ const HomeCookProfile = () => {
   const [dishes, setDishes] = useState<FoodDish[]>([]);
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
+  const [contactOpen, setContactOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -215,12 +217,17 @@ const HomeCookProfile = () => {
               </div>
               
               <div className="flex gap-3">
-                <Button variant="secondary" size="lg">
+                <Button variant="secondary" size="lg" onClick={() => setContactOpen(true)}>
                   <MessageSquare className="ml-2 h-5 w-5" />
                   راسلها
                 </Button>
                 {cook.profile?.phone && (
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10">
+                  <Button 
+                    variant="outline" 
+                    size="lg" 
+                    className="border-white text-white hover:bg-white/10"
+                    onClick={() => window.location.href = `tel:${cook.profile?.phone}`}
+                  >
                     <Phone className="ml-2 h-5 w-5" />
                     اتصل
                   </Button>
@@ -372,6 +379,15 @@ const HomeCookProfile = () => {
       </main>
 
       <Footer />
+      
+      {cook && (
+        <ContactDialog
+          open={contactOpen}
+          onOpenChange={setContactOpen}
+          recipientId={cook.user_id}
+          recipientName={cook.profile?.full_name || "الطاهية"}
+        />
+      )}
     </div>
   );
 };
