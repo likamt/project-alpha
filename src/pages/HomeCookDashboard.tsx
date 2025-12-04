@@ -15,7 +15,8 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { 
   ChefHat, Plus, Edit, Trash2, Star, Clock, Users, 
-  ShoppingCart, MessageSquare, Loader2, DollarSign 
+  ShoppingCart, MessageSquare, Loader2, DollarSign, 
+  CheckCircle, Package, AlertCircle
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -46,6 +47,25 @@ interface Message {
   } | null;
 }
 
+interface FoodOrder {
+  id: string;
+  client_id: string;
+  quantity: number;
+  unit_price: number;
+  total_amount: number;
+  platform_fee: number;
+  cook_amount: number;
+  status: string;
+  payment_status: string;
+  delivery_address: string | null;
+  client_confirmed_at: string | null;
+  cook_confirmed_at: string | null;
+  created_at: string | null;
+  dish: {
+    name: string;
+  } | null;
+}
+
 const categories = [
   { value: "main", label: "أطباق رئيسية" },
   { value: "appetizer", label: "مقبلات" },
@@ -62,11 +82,13 @@ const HomeCookDashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [cookProfile, setCookProfile] = useState<any>(null);
   const [dishes, setDishes] = useState<FoodDish[]>([]);
+  const [orders, setOrders] = useState<FoodOrder[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingDish, setEditingDish] = useState<FoodDish | null>(null);
+  const [confirmingOrder, setConfirmingOrder] = useState<string | null>(null);
   
   const [dishForm, setDishForm] = useState({
     name: "",
@@ -114,6 +136,7 @@ const HomeCookDashboard = () => {
 
       setCookProfile(cook);
       await loadDishes(cook.id);
+      await loadOrders(cook.id);
       await loadMessages(user.id);
     } catch (error) {
       console.error("Error:", error);
@@ -134,6 +157,23 @@ const HomeCookDashboard = () => {
       return;
     }
     setDishes(data || []);
+  };
+
+  const loadOrders = async (cookId: string) => {
+    const { data, error } = await supabase
+      .from("food_orders")
+      .select(`
+        *,
+        dish:food_dishes(name)
+      `)
+      .eq("cook_id", cookId)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error loading orders:", error);
+      return;
+    }
+    setOrders(data || []);
   };
 
   const loadMessages = async (userId: string) => {
@@ -294,6 +334,53 @@ const HomeCookDashboard = () => {
     ));
   };
 
+  const confirmDelivery = async (orderId: string) => {
+    setConfirmingOrder(orderId);
+    try {
+      const { data, error } = await supabase.functions.invoke("confirm-order-delivery", {
+        body: { order_id: orderId, role: "cook" },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: data.escrow_released ? "تم إكمال الطلب!" : "تم تأكيد التسليم",
+        description: data.escrow_released 
+          ? "تم تحويل المبلغ لحسابك. شكراً لك!"
+          : "في انتظار تأكيد العميل لتحرير المبلغ",
+      });
+
+      if (cookProfile) await loadOrders(cookProfile.id);
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setConfirmingOrder(null);
+    }
+  };
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from("food_orders")
+        .update({ status: newStatus })
+        .eq("id", orderId);
+
+      if (error) throw error;
+      toast({ title: "تم تحديث حالة الطلب" });
+      if (cookProfile) await loadOrders(cookProfile.id);
+    } catch (error: any) {
+      toast({
+        title: "خطأ",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex flex-col" dir="rtl">
@@ -305,6 +392,17 @@ const HomeCookDashboard = () => {
       </div>
     );
   }
+
+  const activeOrders = orders.filter(o => !["completed", "cancelled"].includes(o.status));
+  const statusLabels: Record<string, { label: string; color: string }> = {
+    pending: { label: "في انتظار الدفع", color: "bg-yellow-500" },
+    paid: { label: "تم الدفع", color: "bg-blue-500" },
+    preparing: { label: "جاري التحضير", color: "bg-orange-500" },
+    ready: { label: "جاهز للتسليم", color: "bg-purple-500" },
+    delivered: { label: "تم التوصيل", color: "bg-green-500" },
+    completed: { label: "مكتمل", color: "bg-green-600" },
+    cancelled: { label: "ملغي", color: "bg-red-500" },
+  };
 
   const stats = {
     totalDishes: dishes.length,
@@ -483,8 +581,14 @@ const HomeCookDashboard = () => {
           </div>
 
           {/* Main Content */}
-          <Tabs defaultValue="dishes" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+          <Tabs defaultValue="orders" className="space-y-6">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
+              <TabsTrigger value="orders">
+                الطلبات
+                {activeOrders.length > 0 && (
+                  <Badge className="mr-2 bg-orange-500">{activeOrders.length}</Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value="dishes">الأطباق</TabsTrigger>
               <TabsTrigger value="messages">
                 الرسائل
@@ -493,6 +597,135 @@ const HomeCookDashboard = () => {
                 )}
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="orders">
+              {orders.length === 0 ? (
+                <Card>
+                  <CardContent className="py-12 text-center">
+                    <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <h3 className="text-xl font-semibold mb-2">لا توجد طلبات بعد</h3>
+                    <p className="text-muted-foreground">ستظهر هنا الطلبات من العملاء</p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="space-y-4">
+                  {orders.map(order => {
+                    const status = statusLabels[order.status] || { label: order.status, color: "bg-gray-500" };
+                    const canConfirm = ["delivered", "ready"].includes(order.status) && !order.cook_confirmed_at;
+                    
+                    return (
+                      <Card key={order.id}>
+                        <CardContent className="pt-6">
+                          <div className="flex justify-between items-start mb-4">
+                            <div>
+                              <h3 className="font-semibold">{order.dish?.name}</h3>
+                              <p className="text-sm text-muted-foreground">
+                                الكمية: {order.quantity} • {order.total_amount} د.م
+                              </p>
+                              {order.delivery_address && (
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  📍 {order.delivery_address}
+                                </p>
+                              )}
+                            </div>
+                            <Badge className={status.color}>{status.label}</Badge>
+                          </div>
+                          
+                          {/* Status update buttons */}
+                          {order.status === "paid" && (
+                            <div className="flex gap-2 mb-4">
+                              <Button 
+                                size="sm" 
+                                onClick={() => updateOrderStatus(order.id, "preparing")}
+                                className="bg-orange-500 hover:bg-orange-600"
+                              >
+                                بدء التحضير
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {order.status === "preparing" && (
+                            <div className="flex gap-2 mb-4">
+                              <Button 
+                                size="sm" 
+                                onClick={() => updateOrderStatus(order.id, "ready")}
+                                className="bg-purple-500 hover:bg-purple-600"
+                              >
+                                جاهز للتسليم
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {order.status === "ready" && (
+                            <div className="flex gap-2 mb-4">
+                              <Button 
+                                size="sm" 
+                                onClick={() => updateOrderStatus(order.id, "delivered")}
+                                className="bg-green-500 hover:bg-green-600"
+                              >
+                                تم التوصيل
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {/* Confirmation status */}
+                          {!["completed", "cancelled", "pending"].includes(order.status) && (
+                            <div className="flex items-center gap-4 text-xs mb-3">
+                              <span className={order.client_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
+                                {order.client_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
+                                تأكيد العميل
+                              </span>
+                              <span className={order.cook_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
+                                {order.cook_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
+                                تأكيدك
+                              </span>
+                            </div>
+                          )}
+                          
+                          {/* Confirm delivery button */}
+                          {canConfirm && (
+                            <Button 
+                              onClick={() => confirmDelivery(order.id)}
+                              disabled={confirmingOrder === order.id}
+                              className="bg-green-600 hover:bg-green-700"
+                              size="sm"
+                            >
+                              {confirmingOrder === order.id ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 ml-2" />
+                                  تأكيد التسليم
+                                </>
+                              )}
+                            </Button>
+                          )}
+                          
+                          {/* Escrow info */}
+                          {order.payment_status === "held" && (
+                            <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700 flex items-center gap-2">
+                              <AlertCircle className="h-4 w-4" />
+                              المبلغ محجوز - سيُحول لك بعد تأكيد الطرفين: {order.cook_amount} د.م
+                            </div>
+                          )}
+                          
+                          {order.status === "completed" && (
+                            <div className="mt-3 p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-2">
+                              <CheckCircle className="h-4 w-4" />
+                              تم تحويل المبلغ: {order.cook_amount} د.م
+                            </div>
+                          )}
+                          
+                          <div className="text-xs text-muted-foreground mt-3 text-left">
+                            {order.created_at ? new Date(order.created_at).toLocaleDateString("ar-MA") : ""}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
+              )}
+            </TabsContent>
 
             <TabsContent value="dishes">
               {dishes.length === 0 ? (

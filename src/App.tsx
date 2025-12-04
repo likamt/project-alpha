@@ -15,6 +15,8 @@ import HouseWorkers from "./pages/HouseWorkers";
 import HomeCooking from "./pages/HomeCooking";
 import HomeCookProfile from "./pages/HomeCookProfile";
 import HomeCookDashboard from "./pages/HomeCookDashboard";
+import OrderSuccess from "./pages/OrderSuccess";
+import MyOrders from "./pages/MyOrders";
 import Craftsmen from "./pages/Craftsmen";
 import NotFound from "./pages/NotFound";
 
@@ -38,6 +40,8 @@ const App = () => (
           <Route path="/home-cooking" element={<HomeCooking />} />
           <Route path="/home-cook/:id" element={<HomeCookProfile />} />
           <Route path="/cook-dashboard" element={<HomeCookDashboard />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/craftsmen" element={<Craftsmen />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

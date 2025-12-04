@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import OrderDialog from "@/components/OrderDialog";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,8 @@ const HomeCooking = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState<FoodDish | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -90,10 +93,8 @@ const HomeCooking = () => {
   });
 
   const handleOrder = (dish: FoodDish) => {
-    toast({
-      title: "قريباً!",
-      description: `سيتم تفعيل خدمة الطلب قريباً. طبق: ${dish.name}`,
-    });
+    setSelectedDish(dish);
+    setOrderDialogOpen(true);
   };
 
   return (
@@ -264,6 +265,17 @@ const HomeCooking = () => {
       </main>
 
       <Footer />
+      
+      <OrderDialog
+        open={orderDialogOpen}
+        onOpenChange={setOrderDialogOpen}
+        dish={selectedDish ? {
+          id: selectedDish.id,
+          name: selectedDish.name,
+          price: selectedDish.price,
+          preparation_time_minutes: selectedDish.preparation_time_minutes,
+        } : null}
+      />
     </div>
   );
 };
