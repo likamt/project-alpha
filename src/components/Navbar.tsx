@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, X, User, LogOut, Settings, Package, 
-  MessageSquare, Calendar, Shield 
+  MessageSquare, Calendar, Shield, ChefHat 
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -19,6 +19,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
+  const [isHomeCook, setIsHomeCook] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -51,6 +52,14 @@ const Navbar = () => {
       .eq('id', userId)
       .single();
     setProfile(data);
+    
+    // Check if user is a home cook
+    const { data: cookData } = await supabase
+      .from('home_cooks')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    setIsHomeCook(!!cookData);
   };
 
   const handleSignOut = async () => {
@@ -120,6 +129,15 @@ const Navbar = () => {
                     <MessageSquare className="ml-2 h-4 w-4" />
                     الرسائل
                   </DropdownMenuItem>
+                  {isHomeCook && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/cook-dashboard")}>
+                        <ChefHat className="ml-2 h-4 w-4" />
+                        لوحة تحكم الطاهية
+                      </DropdownMenuItem>
+                    </>
+                  )}
                   {profile?.role === 'admin' && (
                     <>
                       <DropdownMenuSeparator />
@@ -199,6 +217,15 @@ const Navbar = () => {
                 >
                   حجوزاتي
                 </Link>
+                {isHomeCook && (
+                  <Link
+                    to="/cook-dashboard"
+                    className="block py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    لوحة تحكم الطاهية
+                  </Link>
+                )}
                 {profile?.role === 'admin' && (
                   <Link
                     to="/admin"
