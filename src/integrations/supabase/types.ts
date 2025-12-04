@@ -135,6 +135,96 @@ export type Database = {
           },
         ]
       }
+      food_orders: {
+        Row: {
+          client_confirmed_at: string | null
+          client_id: string
+          cook_amount: number
+          cook_confirmed_at: string | null
+          cook_id: string
+          created_at: string | null
+          delivery_address: string | null
+          delivery_notes: string | null
+          dish_id: string
+          escrow_released_at: string | null
+          id: string
+          payment_status: string
+          platform_fee: number
+          quantity: number
+          receipt_data: Json | null
+          receipt_generated_at: string | null
+          scheduled_delivery_at: string | null
+          status: string
+          stripe_payment_intent_id: string | null
+          total_amount: number
+          unit_price: number
+          updated_at: string | null
+        }
+        Insert: {
+          client_confirmed_at?: string | null
+          client_id: string
+          cook_amount?: number
+          cook_confirmed_at?: string | null
+          cook_id: string
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_notes?: string | null
+          dish_id: string
+          escrow_released_at?: string | null
+          id?: string
+          payment_status?: string
+          platform_fee?: number
+          quantity?: number
+          receipt_data?: Json | null
+          receipt_generated_at?: string | null
+          scheduled_delivery_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          total_amount: number
+          unit_price: number
+          updated_at?: string | null
+        }
+        Update: {
+          client_confirmed_at?: string | null
+          client_id?: string
+          cook_amount?: number
+          cook_confirmed_at?: string | null
+          cook_id?: string
+          created_at?: string | null
+          delivery_address?: string | null
+          delivery_notes?: string | null
+          dish_id?: string
+          escrow_released_at?: string | null
+          id?: string
+          payment_status?: string
+          platform_fee?: number
+          quantity?: number
+          receipt_data?: Json | null
+          receipt_generated_at?: string | null
+          scheduled_delivery_at?: string | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          total_amount?: number
+          unit_price?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_orders_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_orders_dish_id_fkey"
+            columns: ["dish_id"]
+            isOneToOne: false
+            referencedRelation: "food_dishes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       home_cooks: {
         Row: {
           availability: Json | null
