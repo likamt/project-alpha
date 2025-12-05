@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User, Mail, Phone, MapPin, Edit, Save, X, Shield } from "lucide-react";
+import { User, Mail, Phone, MapPin, Edit, Save, X, Shield, ChefHat, Home, Wrench } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+type AppRole = "admin" | "client" | "craftsman" | "house_worker" | "home_cook";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Profile = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState<any>(null);
+  const [userRoles, setUserRoles] = useState<AppRole[]>([]);
   const [formData, setFormData] = useState({
     full_name: "",
     phone: "",
@@ -43,18 +45,25 @@ const Profile = () => {
         return;
       }
 
-      const { data, error } = await supabase
+      // جلب الملف الشخصي
+      const { data: profileData, error: profileError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
         .single();
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
-      setProfile(data);
+      // جلب الأدوار من جدول user_roles
+      const { data: rolesData } = await supabase.rpc("get_user_roles", {
+        _user_id: session.user.id,
+      });
+
+      setProfile(profileData);
+      setUserRoles((rolesData as AppRole[]) || ["client"]);
       setFormData({
-        full_name: data.full_name || "",
-        phone: data.phone || "",
+        full_name: profileData.full_name || "",
+        phone: profileData.phone || "",
       });
     } catch (error: any) {
       console.error("Error loading profile:", error);
@@ -86,7 +95,7 @@ const Profile = () => {
 
       if (error) throw error;
 
-      setProfile((prev: any) => prev ? { ...prev, ...formData } : null);
+      setProfile((prev: any) => (prev ? { ...prev, ...formData } : null));
       setEditing(false);
 
       toast({
@@ -106,6 +115,33 @@ const Profile = () => {
     await supabase.auth.signOut();
     navigate("/");
   };
+
+  const getRoleLabel = (role: AppRole) => {
+    const labels: Record<AppRole, string> = {
+      admin: "مدير",
+      client: "عميل",
+      craftsman: "حرفي",
+      house_worker: "عاملة منزلية",
+      home_cook: "طاهية منزلية",
+    };
+    return labels[role] || role;
+  };
+
+  const getRoleBadgeClass = (role: AppRole) => {
+    const classes: Record<AppRole, string> = {
+      admin: "bg-destructive text-destructive-foreground",
+      client: "bg-primary text-primary-foreground",
+      craftsman: "bg-blue-500 text-white",
+      house_worker: "bg-purple-500 text-white",
+      home_cook: "bg-orange-500 text-white",
+    };
+    return classes[role] || "bg-secondary text-secondary-foreground";
+  };
+
+  const isAdmin = userRoles.includes("admin");
+  const isHomeCook = userRoles.includes("home_cook");
+  const isCraftsman = userRoles.includes("craftsman");
+  const isHouseWorker = userRoles.includes("house_worker");
 
   if (loading) {
     return (
@@ -153,20 +189,13 @@ const Profile = () => {
                       <User className="h-12 w-12 text-white" />
                     </div>
                     <h2 className="text-xl font-bold mb-2">{profile.full_name}</h2>
-                    <Badge
-                      variant="secondary"
-                      className={
-                        profile.role === "admin"
-                          ? "bg-destructive text-destructive-foreground"
-                          : "bg-primary text-primary-foreground"
-                      }
-                    >
-                      {profile.role === "client"
-                        ? "عميل"
-                        : profile.role === "craftsman"
-                        ? "حرفي"
-                        : "مدير"}
-                    </Badge>
+                    <div className="flex flex-wrap justify-center gap-2 mb-4">
+                      {userRoles.map((role) => (
+                        <Badge key={role} className={getRoleBadgeClass(role)}>
+                          {getRoleLabel(role)}
+                        </Badge>
+                      ))}
+                    </div>
 
                     <div className="space-y-3 text-sm text-muted-foreground mt-6">
                       <div className="flex items-center gap-2">
@@ -201,18 +230,37 @@ const Profile = () => {
                           </>
                         )}
                       </Button>
-                      
-                      {profile.role === "admin" && (
+
+                      {isAdmin && (
                         <Button
                           variant="outline"
-                          className="w-full border-primary text-primary hover:bg-primary/10"
+                          className="w-full border-destructive text-destructive hover:bg-destructive/10"
                           onClick={() => navigate("/admin")}
                         >
                           <Shield className="h-4 w-4 ml-2" />
                           لوحة التحكم
                         </Button>
                       )}
-                      
+
+                      {isHomeCook && (
+                        <Button
+                          variant="outline"
+                          className="w-full border-orange-500 text-orange-500 hover:bg-orange-50"
+                          onClick={() => navigate("/home-cook-dashboard")}
+                        >
+                          <ChefHat className="h-4 w-4 ml-2" />
+                          لوحة الطاهية
+                        </Button>
+                      )}
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => navigate("/my-orders")}
+                      >
+                        طلباتي
+                      </Button>
+
                       <Button
                         variant="outline"
                         className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
@@ -274,14 +322,14 @@ const Profile = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label className="text-muted-foreground">الدور</Label>
-                          <p className="font-medium">
-                            {profile.role === "client"
-                              ? "عميل"
-                              : profile.role === "craftsman"
-                              ? "حرفي"
-                              : "مدير"}
-                          </p>
+                          <Label className="text-muted-foreground">الأدوار</Label>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {userRoles.map((role) => (
+                              <Badge key={role} variant="outline" className="text-xs">
+                                {getRoleLabel(role)}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                         <div>
                           <Label className="text-muted-foreground">الباقة</Label>
@@ -297,15 +345,50 @@ const Profile = () => {
                     </div>
                   )}
 
-                  {profile.role === "client" && (
-                    <div className="mt-8 p-4 bg-muted rounded-lg">
-                      <h3 className="font-semibold mb-2">هل أنت حرفي؟</h3>
-                      <p className="text-sm text-muted-foreground mb-4">
-                        انضم إلى منصتنا كحرفي واحصل على المزيد من فرص العمل
-                      </p>
-                      <Button variant="outline" onClick={() => navigate("/join")}>
-                        انضم كحرفي
-                      </Button>
+                  {/* خيارات الانضمام كمقدم خدمة */}
+                  {!isCraftsman && !isHouseWorker && !isHomeCook && (
+                    <div className="mt-8 space-y-4">
+                      <h3 className="font-semibold">انضم كمقدم خدمة</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Wrench className="h-5 w-5 text-blue-500" />
+                            <span className="font-medium">حرفي</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            قدم خدمات الصيانة والإصلاح
+                          </p>
+                          <Button variant="outline" size="sm" onClick={() => navigate("/join-craftsman")}>
+                            انضم الآن
+                          </Button>
+                        </div>
+
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Home className="h-5 w-5 text-purple-500" />
+                            <span className="font-medium">عاملة منزلية</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            قدمي خدمات التنظيف والعناية
+                          </p>
+                          <Button variant="outline" size="sm" onClick={() => navigate("/join-house-worker")}>
+                            انضمي الآن
+                          </Button>
+                        </div>
+
+                        <div className="p-4 bg-muted rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ChefHat className="h-5 w-5 text-orange-500" />
+                            <span className="font-medium">طاهية منزلية</span>
+                          </div>
+                          <p className="text-sm text-muted-foreground mb-3">
+                            شاركي وصفاتك واكسبي دخلاً
+                          </p>
+                          <Button variant="outline" size="sm" onClick={() => navigate("/join-home-cook")}>
+                            انضمي الآن
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </CardContent>
