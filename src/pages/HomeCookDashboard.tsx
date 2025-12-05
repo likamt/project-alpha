@@ -106,6 +106,61 @@ const HomeCookDashboard = () => {
     checkUserAndLoadData();
   }, []);
 
+  // إشعارات Realtime للطلبات الجديدة
+  useEffect(() => {
+    if (!cookProfile?.id) return;
+
+    const channel = supabase
+      .channel('food-orders-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'food_orders',
+          filter: `cook_id=eq.${cookProfile.id}`,
+        },
+        async (payload) => {
+          console.log('New order received:', payload);
+          
+          // تحديث قائمة الطلبات
+          await loadOrders(cookProfile.id);
+          
+          // إشعار صوتي وبصري
+          toast({
+            title: "🎉 طلب جديد!",
+            description: "لديك طلب جديد في انتظار المراجعة",
+            duration: 10000,
+          });
+
+          // تشغيل صوت الإشعار
+          try {
+            const audio = new Audio('/notification.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(() => {});
+          } catch (e) {}
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'food_orders',
+          filter: `cook_id=eq.${cookProfile.id}`,
+        },
+        async (payload) => {
+          console.log('Order updated:', payload);
+          await loadOrders(cookProfile.id);
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [cookProfile?.id]);
+
   const checkUserAndLoadData = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
