@@ -14,6 +14,7 @@ import Footer from "@/components/Footer";
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +46,10 @@ const Auth = () => {
     try {
       if (password.length < 6) {
         throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      }
+
+      if (password !== confirmPassword) {
+        throw new Error("كلمات المرور غير متطابقة");
       }
 
       if (!fullName.trim()) {
@@ -89,10 +94,9 @@ const Auth = () => {
 
         toast({
           title: "تم إنشاء الحساب بنجاح",
-          description: "تم تسجيل دخولك تلقائياً",
+          description: "تم إرسال رابط التأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك لتفعيل حسابك.",
+          duration: 10000,
         });
-
-        navigate("/profile");
       }
     } catch (error: any) {
       console.error("Error signing up:", error);
@@ -393,6 +397,23 @@ const Auth = () => {
                       <p className="text-xs text-muted-foreground">
                         يجب أن تكون كلمة المرور 6 أحرف على الأقل
                       </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-confirm-password">تأكيد كلمة المرور</Label>
+                      <div className="relative">
+                        <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Input
+                          id="signup-confirm-password"
+                          type="password"
+                          placeholder="••••••••"
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="pr-10"
+                          minLength={6}
+                          required
+                        />
+                      </div>
                     </div>
 
                     <Button
