@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ interface ContactDialogProps {
 
 const ContactDialog = ({ open, onOpenChange, recipientId, recipientName }: ContactDialogProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
 
@@ -39,6 +41,8 @@ const ContactDialog = ({ open, onOpenChange, recipientId, recipientName }: Conta
           description: "يرجى تسجيل الدخول لإرسال رسالة",
           variant: "destructive",
         });
+        onOpenChange(false);
+        navigate("/auth");
         return;
       }
 
@@ -57,6 +61,9 @@ const ContactDialog = ({ open, onOpenChange, recipientId, recipientName }: Conta
       
       setMessage("");
       onOpenChange(false);
+      
+      // Navigate to messages page
+      navigate(`/messages?user=${recipientId}`);
     } catch (error: any) {
       toast({
         title: "خطأ",

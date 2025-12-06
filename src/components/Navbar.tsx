@@ -20,6 +20,7 @@ const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isHomeCook, setIsHomeCook] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -28,6 +29,7 @@ const Navbar = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
+        checkRoles(session.user.id);
       }
     });
 
@@ -37,8 +39,11 @@ const Navbar = () => {
       setUser(session?.user ?? null);
       if (session?.user) {
         loadProfile(session.user.id);
+        checkRoles(session.user.id);
       } else {
         setProfile(null);
+        setIsHomeCook(false);
+        setIsAdmin(false);
       }
     });
 
@@ -50,9 +55,11 @@ const Navbar = () => {
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
+      .maybeSingle();
     setProfile(data);
-    
+  };
+
+  const checkRoles = async (userId: string) => {
     // Check if user is a home cook
     const { data: cookData } = await supabase
       .from('home_cooks')
@@ -60,6 +67,13 @@ const Navbar = () => {
       .eq('user_id', userId)
       .maybeSingle();
     setIsHomeCook(!!cookData);
+
+    // Check if user is admin using the secure function
+    const { data: adminData } = await supabase.rpc('has_role', {
+      _user_id: userId,
+      _role: 'admin'
+    });
+    setIsAdmin(!!adminData);
   };
 
   const handleSignOut = async () => {
@@ -138,7 +152,7 @@ const Navbar = () => {
                       </DropdownMenuItem>
                     </>
                   )}
-                  {profile?.role === 'admin' && (
+                  {isAdmin && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
@@ -211,11 +225,11 @@ const Navbar = () => {
                   الملف الشخصي
                 </Link>
                 <Link
-                  to="/bookings"
+                  to="/messages"
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  حجوزاتي
+                  الرسائل
                 </Link>
                 {isHomeCook && (
                   <Link
@@ -226,7 +240,7 @@ const Navbar = () => {
                     لوحة تحكم الطاهية
                   </Link>
                 )}
-                {profile?.role === 'admin' && (
+                {isAdmin && (
                   <Link
                     to="/admin"
                     className="block py-2 text-foreground hover:text-primary transition-colors"

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { User, Mail, Phone, MapPin, Edit, Save, X, Shield, ChefHat, Home, Wrench } from "lucide-react";
+import { User, Mail, Phone, MapPin, Edit, Save, X, Shield, ChefHat, Home, Wrench, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -252,6 +252,15 @@ const Profile = () => {
                           لوحة الطاهية
                         </Button>
                       )}
+
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => navigate("/messages")}
+                      >
+                        <MessageSquare className="h-4 w-4 ml-2" />
+                        الرسائل
+                      </Button>
 
                       <Button
                         variant="outline"
