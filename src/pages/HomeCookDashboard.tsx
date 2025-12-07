@@ -16,9 +16,10 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { 
   ChefHat, Plus, Edit, Trash2, Star, Clock, Users, 
   ShoppingCart, MessageSquare, Loader2, DollarSign, 
-  CheckCircle, Package, AlertCircle
+  CheckCircle, Package, AlertCircle, ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import PortfolioUploader from "@/components/PortfolioUploader";
 
 interface FoodDish {
   id: string;
@@ -637,7 +638,7 @@ const HomeCookDashboard = () => {
 
           {/* Main Content */}
           <Tabs defaultValue="orders" className="space-y-6">
-            <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsList className="grid w-full max-w-2xl grid-cols-4">
               <TabsTrigger value="orders">
                 الطلبات
                 {activeOrders.length > 0 && (
@@ -645,6 +646,10 @@ const HomeCookDashboard = () => {
                 )}
               </TabsTrigger>
               <TabsTrigger value="dishes">الأطباق</TabsTrigger>
+              <TabsTrigger value="portfolio">
+                <ImageIcon className="h-4 w-4 ml-1" />
+                معرض الأعمال
+              </TabsTrigger>
               <TabsTrigger value="messages">
                 الرسائل
                 {stats.unreadMessages > 0 && (
@@ -857,6 +862,36 @@ const HomeCookDashboard = () => {
                   ))}
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="portfolio">
+              <Card>
+                <CardContent className="pt-6">
+                  {user && (
+                    <PortfolioUploader
+                      userId={user.id}
+                      currentImages={cookProfile?.portfolio_images || []}
+                      onImagesUpdate={async (images) => {
+                        try {
+                          const { error } = await supabase
+                            .from("home_cooks")
+                            .update({ portfolio_images: images })
+                            .eq("id", cookProfile.id);
+                          
+                          if (error) throw error;
+                          setCookProfile({ ...cookProfile, portfolio_images: images });
+                        } catch (error: any) {
+                          toast({
+                            title: "خطأ",
+                            description: error.message,
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="messages">

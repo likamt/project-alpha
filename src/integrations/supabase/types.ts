@@ -24,6 +24,7 @@ export type Database = {
           id: string
           is_verified: boolean | null
           location: string | null
+          portfolio_images: string[] | null
           profession: string
           rating: number | null
           services: string[] | null
@@ -39,6 +40,7 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           location?: string | null
+          portfolio_images?: string[] | null
           profession: string
           rating?: number | null
           services?: string[] | null
@@ -54,6 +56,7 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           location?: string | null
+          portfolio_images?: string[] | null
           profession?: string
           rating?: number | null
           services?: string[] | null
@@ -237,6 +240,7 @@ export type Database = {
           is_verified: boolean | null
           location: string | null
           min_order_amount: number | null
+          portfolio_images: string[] | null
           rating: number | null
           specialties: string[] | null
           updated_at: string | null
@@ -253,6 +257,7 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           min_order_amount?: number | null
+          portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
           updated_at?: string | null
@@ -269,6 +274,7 @@ export type Database = {
           is_verified?: boolean | null
           location?: string | null
           min_order_amount?: number | null
+          portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
           updated_at?: string | null
@@ -294,6 +300,7 @@ export type Database = {
           id: string
           is_verified: boolean | null
           location: string | null
+          portfolio_images: string[] | null
           rating: number | null
           services: string[]
           updated_at: string | null
@@ -308,6 +315,7 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           location?: string | null
+          portfolio_images?: string[] | null
           rating?: number | null
           services?: string[]
           updated_at?: string | null
@@ -322,6 +330,7 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           location?: string | null
+          portfolio_images?: string[] | null
           rating?: number | null
           services?: string[]
           updated_at?: string | null

@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Star, Clock, Users, ChefHat, MapPin, ShoppingCart, 
-  CheckCircle, Phone, MessageSquare, ArrowRight 
+  CheckCircle, Phone, MessageSquare, ArrowRight, ImageIcon
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -26,6 +26,7 @@ interface HomeCook {
   completed_orders: number | null;
   delivery_available: boolean | null;
   min_order_amount: number | null;
+  portfolio_images: string[] | null;
   profile: {
     full_name: string;
     avatar_url: string | null;
@@ -75,6 +76,7 @@ const HomeCookProfile = () => {
   const [ratings, setRatings] = useState<Rating[]>([]);
   const [loading, setLoading] = useState(true);
   const [contactOpen, setContactOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -241,8 +243,12 @@ const HomeCookProfile = () => {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <Tabs defaultValue="dishes" className="space-y-6">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+              <TabsList className="grid w-full max-w-lg mx-auto grid-cols-4">
                 <TabsTrigger value="dishes">الأطباق ({dishes.length})</TabsTrigger>
+                <TabsTrigger value="portfolio">
+                  <ImageIcon className="h-4 w-4 ml-1" />
+                  معرض الأعمال
+                </TabsTrigger>
                 <TabsTrigger value="about">نبذة</TabsTrigger>
                 <TabsTrigger value="reviews">التقييمات</TabsTrigger>
               </TabsList>
@@ -327,6 +333,31 @@ const HomeCookProfile = () => {
                   </div>
                 )}
               </TabsContent>
+
+              <TabsContent value="portfolio">
+                {(cook.portfolio_images?.length ?? 0) === 0 ? (
+                  <div className="text-center py-12">
+                    <ImageIcon className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                    <p className="text-muted-foreground">لا توجد صور في المعرض بعد</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {cook.portfolio_images?.map((image, index) => (
+                      <div 
+                        key={index} 
+                        className="aspect-square cursor-pointer hover:opacity-90 transition-opacity"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                        <img
+                          src={image}
+                          alt={`عمل ${index + 1}`}
+                          className="w-full h-full object-cover rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
               
               <TabsContent value="about">
                 <Card className="max-w-2xl mx-auto">
@@ -387,6 +418,20 @@ const HomeCookProfile = () => {
           recipientId={cook.user_id}
           recipientName={cook.profile?.full_name || "الطاهية"}
         />
+      )}
+
+      {/* Image Lightbox */}
+      {selectedImage && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedImage(null)}
+        >
+          <img
+            src={selectedImage}
+            alt="صورة مكبرة"
+            className="max-w-full max-h-full object-contain rounded-lg"
+          />
+        </div>
       )}
     </div>
   );
