@@ -33,9 +33,11 @@ interface Booking {
   end_time: string;
   service_type: string;
   status: string;
-  total_amount: number | null;
   notes: string | null;
   created_at: string;
+  client_confirmed_at: string | null;
+  client_rating: number | null;
+  client_comment: string | null;
   has_rating?: boolean;
   worker?: {
     id: string;
@@ -350,13 +352,13 @@ const MyBookings = () => {
                               <div>
                                 <p className="text-sm text-muted-foreground">الحالة</p>
                                 {getStatusBadge(booking.status)}
-                              </div>
-                              <div>
-                                <p className="text-sm text-muted-foreground">المبلغ</p>
-                                <p className="font-bold text-primary">
-                                  {booking.total_amount || 0} د.م
-                                </p>
-                              </div>
+                            </div>
+                            <div>
+                              <p className="text-sm text-muted-foreground">السعر/ساعة</p>
+                              <p className="font-bold text-primary">
+                                {booking.worker?.hourly_rate || 0} د.م
+                              </p>
+                            </div>
                             </div>
 
                             {/* Actions */}

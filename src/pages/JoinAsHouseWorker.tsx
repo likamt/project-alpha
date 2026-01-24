@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Home, CheckCircle } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LocationSelector from "@/components/LocationSelector";
 
 const JoinAsHouseWorker = () => {
   const navigate = useNavigate();
@@ -31,6 +32,8 @@ const JoinAsHouseWorker = () => {
     nationality: "",
     languages: [] as string[],
     available_days: [] as string[],
+    countryId: "",
+    cityId: "",
   });
 
   useEffect(() => {
@@ -63,6 +66,15 @@ const JoinAsHouseWorker = () => {
       toast({
         title: t('houseWorker.servicesOffered'),
         description: t('common.error'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.countryId || !formData.cityId) {
+      toast({
+        title: t('common.error'),
+        description: t('common.selectLocation'),
         variant: "destructive",
       });
       return;
@@ -102,6 +114,8 @@ const JoinAsHouseWorker = () => {
           is_verified: false,
           rating: 0,
           completed_orders: 0,
+          country_id: formData.countryId,
+          city_id: formData.cityId,
         },
       ]);
 
@@ -373,7 +387,16 @@ const JoinAsHouseWorker = () => {
                   </div>
                 </div>
 
-                {/* السعر والموقع */}
+                {/* اختيار الموقع الجغرافي */}
+                <LocationSelector
+                  selectedCountryId={formData.countryId}
+                  selectedCityId={formData.cityId}
+                  onCountryChange={(id) => setFormData({ ...formData, countryId: id })}
+                  onCityChange={(id) => setFormData({ ...formData, cityId: id })}
+                  required
+                />
+
+                {/* السعر والعنوان التفصيلي */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="hourly_rate">{t('houseWorker.hourlyRate')} *</Label>
@@ -390,13 +413,12 @@ const JoinAsHouseWorker = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="location">{t('houseWorker.cityRegion')} *</Label>
+                    <Label htmlFor="location">{t('houseWorker.cityRegion')}</Label>
                     <Input
                       id="location"
-                      placeholder={t('houseWorker.cityRegion')}
+                      placeholder="العنوان التفصيلي..."
                       value={formData.location}
                       onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                      required
                     />
                   </div>
                 </div>

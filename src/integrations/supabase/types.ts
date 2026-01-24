@@ -211,83 +211,88 @@ export type Database = {
       }
       food_orders: {
         Row: {
+          city_id: string | null
           client_confirmed_at: string | null
           client_id: string
           cook_amount: number
-          cook_confirmed_at: string | null
           cook_id: string
+          country_id: string | null
           created_at: string | null
           delivery_address: string | null
           delivery_notes: string | null
           dish_id: string
-          escrow_released_at: string | null
           id: string
           payment_status: string
           platform_fee: number
           quantity: number
-          receipt_data: Json | null
-          receipt_generated_at: string | null
           scheduled_delivery_at: string | null
           status: string
-          stripe_payment_intent_id: string | null
           total_amount: number
           unit_price: number
           updated_at: string | null
         }
         Insert: {
+          city_id?: string | null
           client_confirmed_at?: string | null
           client_id: string
           cook_amount?: number
-          cook_confirmed_at?: string | null
           cook_id: string
+          country_id?: string | null
           created_at?: string | null
           delivery_address?: string | null
           delivery_notes?: string | null
           dish_id: string
-          escrow_released_at?: string | null
           id?: string
           payment_status?: string
           platform_fee?: number
           quantity?: number
-          receipt_data?: Json | null
-          receipt_generated_at?: string | null
           scheduled_delivery_at?: string | null
           status?: string
-          stripe_payment_intent_id?: string | null
           total_amount: number
           unit_price: number
           updated_at?: string | null
         }
         Update: {
+          city_id?: string | null
           client_confirmed_at?: string | null
           client_id?: string
           cook_amount?: number
-          cook_confirmed_at?: string | null
           cook_id?: string
+          country_id?: string | null
           created_at?: string | null
           delivery_address?: string | null
           delivery_notes?: string | null
           dish_id?: string
-          escrow_released_at?: string | null
           id?: string
           payment_status?: string
           platform_fee?: number
           quantity?: number
-          receipt_data?: Json | null
-          receipt_generated_at?: string | null
           scheduled_delivery_at?: string | null
           status?: string
-          stripe_payment_intent_id?: string | null
           total_amount?: number
           unit_price?: number
           updated_at?: string | null
         }
         Relationships: [
           {
+            foreignKeyName: "food_orders_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "food_orders_cook_id_fkey"
             columns: ["cook_id"]
             isOneToOne: false
             referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_orders_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
             referencedColumns: ["id"]
           },
           {
@@ -346,16 +351,21 @@ export type Database = {
       }
       home_cooks: {
         Row: {
+          acceptance_rate: number | null
           availability: Json | null
+          city_id: string | null
           completed_orders: number | null
+          country_id: string | null
           created_at: string | null
           delivery_available: boolean | null
           description: string | null
           hourly_rate: number | null
           id: string
           is_verified: boolean | null
+          last_activity_at: string | null
           location: string | null
           min_order_amount: number | null
+          monthly_tasks_count: number | null
           portfolio_images: string[] | null
           rating: number | null
           specialties: string[] | null
@@ -364,20 +374,26 @@ export type Database = {
           subscription_ends_at: string | null
           subscription_started_at: string | null
           subscription_status: string | null
+          subscription_tier: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          acceptance_rate?: number | null
           availability?: Json | null
+          city_id?: string | null
           completed_orders?: number | null
+          country_id?: string | null
           created_at?: string | null
           delivery_available?: boolean | null
           description?: string | null
           hourly_rate?: number | null
           id?: string
           is_verified?: boolean | null
+          last_activity_at?: string | null
           location?: string | null
           min_order_amount?: number | null
+          monthly_tasks_count?: number | null
           portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
@@ -386,20 +402,26 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          acceptance_rate?: number | null
           availability?: Json | null
+          city_id?: string | null
           completed_orders?: number | null
+          country_id?: string | null
           created_at?: string | null
           delivery_available?: boolean | null
           description?: string | null
           hourly_rate?: number | null
           id?: string
           is_verified?: boolean | null
+          last_activity_at?: string | null
           location?: string | null
           min_order_amount?: number | null
+          monthly_tasks_count?: number | null
           portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
@@ -408,10 +430,25 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "home_cooks_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_cooks_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "home_cooks_user_id_fkey"
             columns: ["user_id"]
@@ -471,10 +508,13 @@ export type Database = {
       }
       house_workers: {
         Row: {
+          acceptance_rate: number | null
           age_range: string | null
           availability: Json | null
           available_days: string[] | null
+          city_id: string | null
           completed_orders: number | null
+          country_id: string | null
           created_at: string | null
           description: string | null
           experience_years: number | null
@@ -482,7 +522,9 @@ export type Database = {
           id: string
           is_verified: boolean | null
           languages: string[] | null
+          last_activity_at: string | null
           location: string | null
+          monthly_tasks_count: number | null
           nationality: string | null
           portfolio_images: string[] | null
           rating: number | null
@@ -493,6 +535,7 @@ export type Database = {
           subscription_ends_at: string | null
           subscription_started_at: string | null
           subscription_status: string | null
+          subscription_tier: string | null
           updated_at: string | null
           user_id: string
           work_hours_end: string | null
@@ -500,10 +543,13 @@ export type Database = {
           work_type: string | null
         }
         Insert: {
+          acceptance_rate?: number | null
           age_range?: string | null
           availability?: Json | null
           available_days?: string[] | null
+          city_id?: string | null
           completed_orders?: number | null
+          country_id?: string | null
           created_at?: string | null
           description?: string | null
           experience_years?: number | null
@@ -511,7 +557,9 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           languages?: string[] | null
+          last_activity_at?: string | null
           location?: string | null
+          monthly_tasks_count?: number | null
           nationality?: string | null
           portfolio_images?: string[] | null
           rating?: number | null
@@ -522,6 +570,7 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string | null
           user_id: string
           work_hours_end?: string | null
@@ -529,10 +578,13 @@ export type Database = {
           work_type?: string | null
         }
         Update: {
+          acceptance_rate?: number | null
           age_range?: string | null
           availability?: Json | null
           available_days?: string[] | null
+          city_id?: string | null
           completed_orders?: number | null
+          country_id?: string | null
           created_at?: string | null
           description?: string | null
           experience_years?: number | null
@@ -540,7 +592,9 @@ export type Database = {
           id?: string
           is_verified?: boolean | null
           languages?: string[] | null
+          last_activity_at?: string | null
           location?: string | null
+          monthly_tasks_count?: number | null
           nationality?: string | null
           portfolio_images?: string[] | null
           rating?: number | null
@@ -551,6 +605,7 @@ export type Database = {
           subscription_ends_at?: string | null
           subscription_started_at?: string | null
           subscription_status?: string | null
+          subscription_tier?: string | null
           updated_at?: string | null
           user_id?: string
           work_hours_end?: string | null
@@ -558,6 +613,20 @@ export type Database = {
           work_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "house_workers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_workers_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "house_workers_user_id_fkey"
             columns: ["user_id"]
@@ -893,7 +962,12 @@ export type Database = {
       worker_bookings: {
         Row: {
           booking_date: string
+          city_id: string | null
+          client_comment: string | null
+          client_confirmed_at: string | null
           client_id: string
+          client_rating: number | null
+          country_id: string | null
           created_at: string | null
           end_time: string
           id: string
@@ -901,13 +975,17 @@ export type Database = {
           service_type: string
           start_time: string
           status: string
-          total_amount: number | null
           updated_at: string | null
           worker_id: string
         }
         Insert: {
           booking_date: string
+          city_id?: string | null
+          client_comment?: string | null
+          client_confirmed_at?: string | null
           client_id: string
+          client_rating?: number | null
+          country_id?: string | null
           created_at?: string | null
           end_time: string
           id?: string
@@ -915,13 +993,17 @@ export type Database = {
           service_type: string
           start_time: string
           status?: string
-          total_amount?: number | null
           updated_at?: string | null
           worker_id: string
         }
         Update: {
           booking_date?: string
+          city_id?: string | null
+          client_comment?: string | null
+          client_confirmed_at?: string | null
           client_id?: string
+          client_rating?: number | null
+          country_id?: string | null
           created_at?: string | null
           end_time?: string
           id?: string
@@ -929,11 +1011,24 @@ export type Database = {
           service_type?: string
           start_time?: string
           status?: string
-          total_amount?: number | null
           updated_at?: string | null
           worker_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "worker_bookings_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "worker_bookings_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "worker_bookings_worker_id_fkey"
             columns: ["worker_id"]
@@ -959,6 +1054,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      reset_monthly_tasks_count: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "client" | "craftsman" | "house_worker" | "home_cook"

@@ -274,6 +274,7 @@ const HomeCooking = () => {
           name: selectedDish.name,
           price: selectedDish.price,
           preparation_time_minutes: selectedDish.preparation_time_minutes,
+          cook_id: selectedDish.cook?.id || "",
         } : null}
       />
     </div>

@@ -22,9 +22,7 @@ interface Order {
   payment_status: string;
   delivery_address: string | null;
   client_confirmed_at: string | null;
-  cook_confirmed_at: string | null;
   created_at: string | null;
-  receipt_data: any;
   dish: {
     name: string;
     image_url: string | null;
@@ -37,14 +35,13 @@ interface Order {
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  pending: { label: "في انتظار الدفع", color: "bg-yellow-500" },
-  paid: { label: "تم الدفع", color: "bg-blue-500" },
+  pending: { label: "في انتظار القبول", color: "bg-yellow-500" },
+  accepted: { label: "تم القبول", color: "bg-blue-500" },
   preparing: { label: "جاري التحضير", color: "bg-orange-500" },
   ready: { label: "جاهز للتسليم", color: "bg-purple-500" },
   delivered: { label: "تم التوصيل", color: "bg-green-500" },
   completed: { label: "مكتمل", color: "bg-green-600" },
   cancelled: { label: "ملغي", color: "bg-red-500" },
-  disputed: { label: "قيد المراجعة", color: "bg-red-600" },
 };
 
 const MyOrders = () => {
@@ -91,17 +88,21 @@ const MyOrders = () => {
   const confirmDelivery = async (orderId: string) => {
     setConfirming(orderId);
     try {
-      const { data, error } = await supabase.functions.invoke("confirm-order-delivery", {
-        body: { order_id: orderId, role: "client" },
-      });
+      // تحديث الطلب مباشرة - الزبون يؤكد الاستلام
+      const { error } = await supabase
+        .from("food_orders")
+        .update({
+          client_confirmed_at: new Date().toISOString(),
+          status: "completed",
+          payment_status: "cash_paid",
+        })
+        .eq("id", orderId);
 
       if (error) throw error;
 
       toast({
-        title: data.escrow_released ? "تم إكمال الطلب!" : "تم تأكيد الاستلام",
-        description: data.escrow_released 
-          ? "تم تحويل المبلغ للطاهية. شكراً لك!"
-          : "في انتظار تأكيد الطاهية لتحرير المبلغ",
+        title: "تم تأكيد الاستلام!",
+        description: "شكراً لك! تم إكمال الطلب بنجاح.",
       });
 
       // Reload orders
@@ -167,25 +168,11 @@ const MyOrders = () => {
                 </span>
               </div>
 
-              {/* Escrow status */}
-              {order.payment_status === "held" && (
-                <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700 flex items-center gap-2">
+              {/* Cash payment status */}
+              {order.payment_status === "cash_pending" && (
+                <div className="mt-3 p-2 bg-orange-50 rounded text-xs text-orange-700 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  المبلغ محجوز بأمان حتى تأكيد الاستلام
-                </div>
-              )}
-
-              {/* Confirmation status */}
-              {order.status !== "completed" && order.status !== "cancelled" && (
-                <div className="mt-3 flex items-center gap-4 text-xs">
-                  <span className={order.client_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
-                    {order.client_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
-                    تأكيد العميل
-                  </span>
-                  <span className={order.cook_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
-                    {order.cook_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
-                    تأكيد الطاهية
-                  </span>
+                  الدفع نقداً عند الاستلام
                 </div>
               )}
 
@@ -202,17 +189,17 @@ const MyOrders = () => {
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4 ml-2" />
-                      تأكيد الاستلام
+                      تأكيد الاستلام والدفع
                     </>
                   )}
                 </Button>
               )}
 
-              {/* Receipt */}
-              {order.status === "completed" && order.receipt_data && (
+              {/* Completed */}
+              {order.status === "completed" && (
                 <div className="mt-3 p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-2">
-                  <Receipt className="h-4 w-4" />
-                  تم إكمال الطلب وتحويل المبلغ
+                  <CheckCircle className="h-4 w-4" />
+                  تم إكمال الطلب بنجاح
                 </div>
               )}
             </div>
