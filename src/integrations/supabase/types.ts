@@ -291,6 +291,11 @@ export type Database = {
           portfolio_images: string[] | null
           rating: number | null
           specialties: string[] | null
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
           updated_at: string | null
           user_id: string
         }
@@ -308,6 +313,11 @@ export type Database = {
           portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -325,6 +335,11 @@ export type Database = {
           portfolio_images?: string[] | null
           rating?: number | null
           specialties?: string[] | null
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           user_id?: string
         }
@@ -395,6 +410,11 @@ export type Database = {
           rating: number | null
           service_category: string | null
           services: string[]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ends_at: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
           updated_at: string | null
           user_id: string
           work_hours_end: string | null
@@ -419,6 +439,11 @@ export type Database = {
           rating?: number | null
           service_category?: string | null
           services?: string[]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           user_id: string
           work_hours_end?: string | null
@@ -443,6 +468,11 @@ export type Database = {
           rating?: number | null
           service_category?: string | null
           services?: string[]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ends_at?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string | null
           user_id?: string
           work_hours_end?: string | null

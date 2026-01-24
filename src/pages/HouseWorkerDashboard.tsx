@@ -4,13 +4,14 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PortfolioUploader from "@/components/PortfolioUploader";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Home, Star, Package, MessageSquare, Loader2, ImageIcon, Edit, Eye,
-  Clock, DollarSign, CheckCircle
+  Clock, DollarSign, CheckCircle, Crown, Calendar
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
@@ -148,14 +149,24 @@ const HouseWorkerDashboard = () => {
           </div>
 
           {/* Main Content */}
-          <Tabs defaultValue="portfolio" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
+          <Tabs defaultValue="subscription" className="space-y-6">
+            <TabsList className="grid w-full max-w-lg grid-cols-3">
+              <TabsTrigger value="subscription" className="flex items-center gap-2">
+                <Crown className="h-4 w-4" />
+                الاشتراك
+              </TabsTrigger>
               <TabsTrigger value="portfolio" className="flex items-center gap-2">
                 <ImageIcon className="h-4 w-4" />
                 معرض الأعمال
               </TabsTrigger>
               <TabsTrigger value="profile">الملف الشخصي</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="subscription">
+              <div className="max-w-xl">
+                <SubscriptionCard providerType="house_worker" />
+              </div>
+            </TabsContent>
 
             <TabsContent value="portfolio">
               <Card>

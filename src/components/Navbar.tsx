@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, X, User, LogOut, Settings, Package, 
-  MessageSquare, Calendar, Shield, ChefHat, Home as HomeIcon
+  MessageSquare, Calendar, Shield, ChefHat, Home as HomeIcon, CalendarDays
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -142,8 +142,12 @@ const Navbar = () => {
                     <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t("common.profile")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/bookings")}>
-                    <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
+                    <CalendarDays className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    حجوزاتي
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate("/my-orders")}>
+                    <Package className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
                     {t("common.orders")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/messages")}>
@@ -230,6 +234,20 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   الملف الشخصي
+                </Link>
+                <Link
+                  to="/my-bookings"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  حجوزاتي
+                </Link>
+                <Link
+                  to="/my-orders"
+                  className="block py-2 text-foreground hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  طلباتي
                 </Link>
                 <Link
                   to="/messages"
