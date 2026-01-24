@@ -14,14 +14,19 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const Navbar = () => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isHomeCook, setIsHomeCook] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  
+  const isRTL = i18n.language === 'ar';
 
   useEffect(() => {
     // التحقق من حالة المستخدم
@@ -82,15 +87,15 @@ const Navbar = () => {
   };
 
   const navLinks = [
-    { name: "الرئيسية", path: "/" },
-    { name: "الحرفيون", path: "/craftsmen" },
-    { name: "العاملات المنزلية", path: "/house-workers" },
-    { name: "الطبخ المنزلي", path: "/home-cooking" },
-    { name: "كيف يعمل", path: "/how-it-works" },
+    { name: t("common.home"), path: "/" },
+    { name: t("nav.craftsmen"), path: "/craftsmen" },
+    { name: t("nav.houseWorkers"), path: "/house-workers" },
+    { name: t("nav.homeCooking"), path: "/home-cooking" },
+    { name: t("common.howItWorks"), path: "/how-it-works" },
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -117,38 +122,39 @@ const Navbar = () => {
           </div>
 
           {/* User Menu / Auth Buttons */}
-          <div className="hidden md:flex items-center space-x-4 space-x-reverse">
+          <div className="hidden md:flex items-center gap-4">
+            <LanguageSwitcher />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center space-x-2 space-x-reverse">
+                  <Button variant="ghost" className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gradient-primary rounded-full flex items-center justify-center">
                       <User className="h-5 w-5 text-white" />
                     </div>
-                    <span className="font-medium">{profile?.full_name || "المستخدم"}</span>
+                    <span className="font-medium">{profile?.full_name || t("common.profile")}</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
-                  <DropdownMenuLabel>حسابي</DropdownMenuLabel>
+                  <DropdownMenuLabel>{t("common.profile")}</DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <User className="ml-2 h-4 w-4" />
-                    الملف الشخصي
+                    <User className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("common.profile")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/bookings")}>
-                    <Calendar className="ml-2 h-4 w-4" />
-                    حجوزاتي
+                    <Calendar className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("common.orders")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/messages")}>
-                    <MessageSquare className="ml-2 h-4 w-4" />
-                    الرسائل
+                    <MessageSquare className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("common.messages")}
                   </DropdownMenuItem>
                   {isHomeCook && (
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/cook-dashboard")}>
-                        <ChefHat className="ml-2 h-4 w-4" />
-                        لوحة تحكم الطاهية
+                        <ChefHat className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {t("common.dashboard")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -156,38 +162,38 @@ const Navbar = () => {
                     <>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
-                        <Shield className="ml-2 h-4 w-4" />
-                        لوحة التحكم
+                        <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        {t("common.dashboard")}
                       </DropdownMenuItem>
                     </>
                   )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <Settings className="ml-2 h-4 w-4" />
-                    الإعدادات
+                    <Settings className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("common.profile")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-                    <LogOut className="ml-2 h-4 w-4" />
-                    تسجيل الخروج
+                    <LogOut className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                    {t("common.logout")}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
-              <div className="flex items-center space-x-3 space-x-reverse">
+              <div className="flex items-center gap-3">
                 <Button variant="ghost" onClick={() => navigate("/auth")}>
-                  تسجيل الدخول
+                  {t("common.login")}
                 </Button>
                 <Button 
                   variant="outline"
                   onClick={() => navigate("/join-house-worker")}
                 >
-                  انضمي كعاملة
+                  {t("nav.joinAs")}
                 </Button>
                 <Button 
                   className="bg-gradient-primary hover:opacity-90"
                   onClick={() => navigate("/join")}
                 >
-                  انضم كحرفي
+                  {t("nav.craftsmen")}
                 </Button>
               </div>
             )}
