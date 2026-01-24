@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminOverviewTab from "@/components/admin/AdminOverviewTab";
+import AdminAnalyticsTab from "@/components/admin/AdminAnalyticsTab";
 import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminCooksTab from "@/components/admin/AdminCooksTab";
 import AdminWorkersTab from "@/components/admin/AdminWorkersTab";
@@ -114,6 +115,8 @@ const AdminDashboard = () => {
     switch (activeTab) {
       case "overview":
         return <AdminOverviewTab stats={stats} />;
+      case "analytics":
+        return <AdminAnalyticsTab />;
       case "users":
         return <AdminUsersTab />;
       case "cooks":
