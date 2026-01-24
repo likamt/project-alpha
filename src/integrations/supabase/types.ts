@@ -14,6 +14,74 @@ export type Database = {
   }
   public: {
     Tables: {
+      cities: {
+        Row: {
+          country_id: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name_ar: string
+          name_en: string
+          name_fr: string | null
+        }
+        Insert: {
+          country_id: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar: string
+          name_en: string
+          name_fr?: string | null
+        }
+        Update: {
+          country_id?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar?: string
+          name_en?: string
+          name_fr?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cities_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      countries: {
+        Row: {
+          code: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name_ar: string
+          name_en: string
+          name_fr: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar: string
+          name_en: string
+          name_fr?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name_ar?: string
+          name_en?: string
+          name_fr?: string | null
+        }
+        Relationships: []
+      }
       craftsmen: {
         Row: {
           availability: Json | null
@@ -650,6 +718,7 @@ export type Database = {
           created_at: string | null
           full_name: string
           id: string
+          is_suspended: boolean | null
           phone: string | null
           subscription_tier: string | null
           updated_at: string | null
@@ -659,6 +728,7 @@ export type Database = {
           created_at?: string | null
           full_name: string
           id: string
+          is_suspended?: boolean | null
           phone?: string | null
           subscription_tier?: string | null
           updated_at?: string | null
@@ -668,6 +738,7 @@ export type Database = {
           created_at?: string | null
           full_name?: string
           id?: string
+          is_suspended?: boolean | null
           phone?: string | null
           subscription_tier?: string | null
           updated_at?: string | null
@@ -725,6 +796,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      translations: {
+        Row: {
+          created_at: string | null
+          id: string
+          language_code: string
+          translation_key: string
+          translation_value: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          language_code: string
+          translation_key: string
+          translation_value: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          language_code?: string
+          translation_key?: string
+          translation_value?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
