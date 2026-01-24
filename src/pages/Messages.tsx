@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -8,9 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { MessageSquare, Send, ArrowRight, User, Loader2 } from "lucide-react";
+import { MessageSquare, Send, User, Loader2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import VoiceRecorder from "@/components/chat/VoiceRecorder";
+import ChatImageUploader from "@/components/chat/ChatImageUploader";
+import TypingIndicator from "@/components/chat/TypingIndicator";
+import AudioPlayer from "@/components/chat/AudioPlayer";
+import ChatImage from "@/components/chat/ChatImage";
 
 interface Conversation {
   id: string;
@@ -28,6 +33,9 @@ interface Message {
   recipient_id: string;
   is_read: boolean;
   created_at: string;
+  message_type: string;
+  media_url: string | null;
+  media_duration: number | null;
 }
 
 const Messages = () => {
@@ -44,7 +52,10 @@ const Messages = () => {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [participantName, setParticipantName] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [partnerTyping, setPartnerTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -68,7 +79,7 @@ const Messages = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Realtime subscription
+  // Realtime subscription for messages
   useEffect(() => {
     if (!user) return;
 
@@ -98,6 +109,33 @@ const Messages = () => {
     };
   }, [user, activeConversation]);
 
+  // Realtime subscription for typing indicators
+  useEffect(() => {
+    if (!user || !activeConversation) return;
+
+    const channel = supabase
+      .channel('typing-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'typing_indicators',
+          filter: `conversation_partner_id=eq.${user.id}`,
+        },
+        (payload: any) => {
+          if (payload.new?.user_id === activeConversation) {
+            setPartnerTyping(payload.new?.is_typing || false);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, activeConversation]);
+
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
@@ -112,11 +150,43 @@ const Messages = () => {
     setUser(user);
   };
 
+  const updateTypingStatus = useCallback(async (typing: boolean) => {
+    if (!user || !activeConversation) return;
+
+    try {
+      await supabase.from("typing_indicators").upsert({
+        user_id: user.id,
+        conversation_partner_id: activeConversation,
+        is_typing: typing,
+        last_typed_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error updating typing status:", error);
+    }
+  }, [user, activeConversation]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+
+    if (!isTyping) {
+      setIsTyping(true);
+      updateTypingStatus(true);
+    }
+
+    if (typingTimeoutRef.current) {
+      clearTimeout(typingTimeoutRef.current);
+    }
+
+    typingTimeoutRef.current = setTimeout(() => {
+      setIsTyping(false);
+      updateTypingStatus(false);
+    }, 2000);
+  };
+
   const loadConversations = async () => {
     if (!user) return;
     
     try {
-      // Get all messages involving the user
       const { data: allMessages, error } = await supabase
         .from("messages")
         .select(`
@@ -129,7 +199,6 @@ const Messages = () => {
 
       if (error) throw error;
 
-      // Group by conversation partner
       const conversationsMap = new Map<string, Conversation>();
       
       allMessages?.forEach((msg: any) => {
@@ -137,12 +206,19 @@ const Messages = () => {
         const partnerId = isReceived ? msg.sender_id : msg.recipient_id;
         const partnerName = isReceived ? msg.sender?.full_name : msg.recipient?.full_name;
         
+        let lastMessagePreview = msg.content;
+        if (msg.message_type === "image") {
+          lastMessagePreview = "📷 صورة";
+        } else if (msg.message_type === "audio") {
+          lastMessagePreview = "🎤 رسالة صوتية";
+        }
+        
         if (!conversationsMap.has(partnerId)) {
           conversationsMap.set(partnerId, {
             id: partnerId,
             participant_id: partnerId,
             participant_name: partnerName || "مستخدم",
-            last_message: msg.content,
+            last_message: lastMessagePreview,
             last_message_at: msg.created_at,
             unread_count: isReceived && !msg.is_read ? 1 : 0,
           });
@@ -197,30 +273,63 @@ const Messages = () => {
       .eq("recipient_id", user.id);
   };
 
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !activeConversation || !user) return;
+  const sendMessage = async (type: string = "text", content?: string, mediaUrl?: string, duration?: number) => {
+    const messageContent = content || newMessage.trim();
+    if ((!messageContent && type === "text") || !activeConversation || !user) return;
     
     setSending(true);
+    updateTypingStatus(false);
+    
     try {
-      const { error } = await supabase.from("messages").insert({
+      const messageData: any = {
         sender_id: user.id,
         recipient_id: activeConversation,
-        content: newMessage.trim(),
-      });
+        content: messageContent || "",
+        message_type: type,
+      };
+
+      if (mediaUrl) {
+        messageData.media_url = mediaUrl;
+      }
+      if (duration) {
+        messageData.media_duration = duration;
+      }
+
+      const { error } = await supabase.from("messages").insert(messageData);
 
       if (error) throw error;
 
       setMessages(prev => [...prev, {
         id: crypto.randomUUID(),
-        content: newMessage.trim(),
+        content: messageContent || "",
         sender_id: user.id,
         recipient_id: activeConversation,
         is_read: false,
         created_at: new Date().toISOString(),
+        message_type: type,
+        media_url: mediaUrl || null,
+        media_duration: duration || null,
       }]);
       
       setNewMessage("");
       loadConversations();
+
+      // Send notification
+      try {
+        await supabase.functions.invoke("send-notification", {
+          body: {
+            type: "new_message",
+            recipientId: activeConversation,
+            title: "رسالة جديدة",
+            message: type === "text" ? messageContent : (type === "image" ? "صورة جديدة" : "رسالة صوتية"),
+            link: `/messages?user=${user.id}`,
+            sendEmail: true,
+          },
+        });
+      } catch (e) {
+        // Don't fail if notification fails
+        console.log("Notification not sent:", e);
+      }
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -230,6 +339,14 @@ const Messages = () => {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleImageUpload = (imageUrl: string) => {
+    sendMessage("image", "", imageUrl);
+  };
+
+  const handleVoiceRecording = (audioUrl: string, duration: number) => {
+    sendMessage("audio", "", audioUrl, duration);
   };
 
   const formatTime = (dateString: string) => {
@@ -247,9 +364,29 @@ const Messages = () => {
     return date.toLocaleDateString("ar-MA");
   };
 
+  const renderMessageContent = (msg: Message) => {
+    const isSent = msg.sender_id === user?.id;
+
+    switch (msg.message_type) {
+      case "image":
+        return (
+          <div className="space-y-1">
+            {msg.media_url && <ChatImage src={msg.media_url} isSent={isSent} />}
+            {msg.content && <p className="text-sm">{msg.content}</p>}
+          </div>
+        );
+      case "audio":
+        return msg.media_url ? (
+          <AudioPlayer src={msg.media_url} duration={msg.media_duration || undefined} isSent={isSent} />
+        ) : null;
+      default:
+        return <p className="text-sm">{msg.content}</p>;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12 flex items-center justify-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -260,7 +397,7 @@ const Messages = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       <div className="container mx-auto px-4 pt-24 pb-12">
@@ -341,6 +478,9 @@ const Messages = () => {
                       </Avatar>
                       <div>
                         <CardTitle className="text-lg">{participantName}</CardTitle>
+                        {partnerTyping && (
+                          <span className="text-xs text-muted-foreground">يكتب...</span>
+                        )}
                       </div>
                     </div>
                   </CardHeader>
@@ -361,28 +501,32 @@ const Messages = () => {
                                   : "bg-muted rounded-bl-none"
                               }`}
                             >
-                              <p className="text-sm">{msg.content}</p>
-                              <span className={`text-xs ${msg.sender_id === user?.id ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
+                              {renderMessageContent(msg)}
+                              <span className={`text-xs block mt-1 ${msg.sender_id === user?.id ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                                 {formatTime(msg.created_at)}
                               </span>
                             </div>
                           </div>
                         ))}
+                        <TypingIndicator isVisible={partnerTyping} userName={participantName} />
                         <div ref={messagesEndRef} />
                       </div>
                     </ScrollArea>
 
                     {/* Input */}
                     <div className="p-4 border-t">
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
+                        <ChatImageUploader onImageUpload={handleImageUpload} disabled={sending} />
+                        <VoiceRecorder onRecordingComplete={handleVoiceRecording} disabled={sending} />
                         <Input
                           value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
+                          onChange={handleInputChange}
                           placeholder="اكتب رسالتك..."
                           onKeyPress={(e) => e.key === "Enter" && sendMessage()}
                           disabled={sending}
+                          className="flex-1"
                         />
-                        <Button onClick={sendMessage} disabled={sending || !newMessage.trim()}>
+                        <Button onClick={() => sendMessage()} disabled={sending || !newMessage.trim()}>
                           {sending ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (

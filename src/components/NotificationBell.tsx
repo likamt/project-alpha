@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bell, Check, Trash2, MessageSquare, ShoppingBag, CalendarDays, Info } from "lucide-react";
+import { Bell, Check, Trash2, MessageSquare, ShoppingBag, CalendarDays, Info, Star, AlertCircle, UserCheck } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ar, fr, es, de, enUS } from "date-fns/locale";
 
@@ -22,6 +22,8 @@ interface Notification {
   is_read: boolean;
   link: string | null;
   created_at: string;
+  priority?: string | null;
+  metadata?: any;
 }
 
 const NotificationBell = () => {
@@ -179,11 +181,24 @@ const NotificationBell = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case "message":
+      case "new_message":
         return <MessageSquare className="h-4 w-4 text-blue-500" />;
       case "order":
+      case "new_order":
         return <ShoppingBag className="h-4 w-4 text-green-500" />;
+      case "order_update":
+        return <ShoppingBag className="h-4 w-4 text-orange-500" />;
       case "booking":
+      case "new_booking":
         return <CalendarDays className="h-4 w-4 text-purple-500" />;
+      case "booking_update":
+        return <CalendarDays className="h-4 w-4 text-yellow-500" />;
+      case "new_rating":
+        return <Star className="h-4 w-4 text-yellow-500" />;
+      case "verification":
+        return <UserCheck className="h-4 w-4 text-green-500" />;
+      case "alert":
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
       default:
         return <Info className="h-4 w-4 text-gray-500" />;
     }
@@ -232,7 +247,7 @@ const NotificationBell = () => {
                   key={notification.id}
                   className={`p-3 hover:bg-muted/50 cursor-pointer transition-colors ${
                     !notification.is_read ? "bg-primary/5" : ""
-                  }`}
+                  } ${notification.priority === "high" ? "border-r-2 border-r-destructive" : ""}`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
