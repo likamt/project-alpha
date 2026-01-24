@@ -2,8 +2,11 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, TrendingUp, TrendingDown, Calendar, DollarSign } from "lucide-react";
+import { Loader2, TrendingUp, TrendingDown, Calendar, Download, FileSpreadsheet, FileText } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   AreaChart,
   Area,
@@ -45,7 +48,9 @@ interface CategoryData {
 const COLORS = ["hsl(var(--primary))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
 
 const AdminAnalyticsTab = () => {
+  const { toast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
   const [timeRange, setTimeRange] = useState("30");
   const [ordersData, setOrdersData] = useState<OrderData[]>([]);
   const [statusData, setStatusData] = useState<StatusData[]>([]);
@@ -59,6 +64,218 @@ const AdminAnalyticsTab = () => {
     avgOrderValue: 0,
     conversionRate: 0,
   });
+
+  // Export functions
+  const exportToCSV = () => {
+    setExporting(true);
+    try {
+      const timeRangeLabel = timeRange === "7" ? "7_days" : timeRange === "30" ? "30_days" : timeRange === "90" ? "90_days" : "year";
+      
+      // Prepare revenue data
+      let csvContent = "التقرير المالي - " + new Date().toLocaleDateString("ar-MA") + "\n\n";
+      csvContent += "=== ملخص الإحصائيات ===\n";
+      csvContent += `إجمالي الإيرادات,${stats.totalRevenue} د.م\n`;
+      csvContent += `نمو الإيرادات,${stats.revenueGrowth}%\n`;
+      csvContent += `إجمالي الطلبات,${stats.totalOrders}\n`;
+      csvContent += `نمو الطلبات,${stats.ordersGrowth}%\n`;
+      csvContent += `متوسط قيمة الطلب,${stats.avgOrderValue} د.م\n\n`;
+      
+      csvContent += "=== بيانات الإيرادات اليومية ===\n";
+      csvContent += "التاريخ,عدد الطلبات,الإيرادات (د.م)\n";
+      ordersData.forEach(row => {
+        csvContent += `${row.date},${row.orders},${row.revenue}\n`;
+      });
+      
+      csvContent += "\n=== توزيع حالات الطلبات ===\n";
+      csvContent += "الحالة,العدد\n";
+      statusData.forEach(row => {
+        csvContent += `${row.name},${row.value}\n`;
+      });
+      
+      csvContent += "\n=== الطلبات حسب الفئة ===\n";
+      csvContent += "الفئة,عدد الطلبات,الإيرادات (د.م)\n";
+      categoryData.forEach(row => {
+        csvContent += `${row.name},${row.orders},${row.revenue}\n`;
+      });
+      
+      csvContent += "\n=== نمو المستخدمين ===\n";
+      csvContent += "التاريخ,المستخدمين الجدد,الطاهيات الجدد,العاملات الجدد\n";
+      userGrowthData.forEach(row => {
+        csvContent += `${row.date},${row.users},${row.cooks},${row.workers}\n`;
+      });
+
+      // Create and download file
+      const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `analytics_report_${timeRangeLabel}_${format(new Date(), "yyyy-MM-dd")}.csv`;
+      link.click();
+      
+      toast({
+        title: "تم التصدير بنجاح",
+        description: "تم تحميل ملف CSV",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء تصدير البيانات",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const exportToExcel = () => {
+    setExporting(true);
+    try {
+      const timeRangeLabel = timeRange === "7" ? "7_days" : timeRange === "30" ? "30_days" : timeRange === "90" ? "90_days" : "year";
+      
+      // Create HTML table for Excel
+      let htmlContent = `
+        <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+        <head><meta charset="UTF-8"></head>
+        <body>
+          <h2>التقرير المالي - ${new Date().toLocaleDateString("ar-MA")}</h2>
+          
+          <h3>ملخص الإحصائيات</h3>
+          <table border="1">
+            <tr><td>إجمالي الإيرادات</td><td>${stats.totalRevenue} د.م</td></tr>
+            <tr><td>نمو الإيرادات</td><td>${stats.revenueGrowth}%</td></tr>
+            <tr><td>إجمالي الطلبات</td><td>${stats.totalOrders}</td></tr>
+            <tr><td>نمو الطلبات</td><td>${stats.ordersGrowth}%</td></tr>
+            <tr><td>متوسط قيمة الطلب</td><td>${stats.avgOrderValue} د.م</td></tr>
+          </table>
+          
+          <h3>بيانات الإيرادات اليومية</h3>
+          <table border="1">
+            <tr><th>التاريخ</th><th>عدد الطلبات</th><th>الإيرادات (د.م)</th></tr>
+            ${ordersData.map(row => `<tr><td>${row.date}</td><td>${row.orders}</td><td>${row.revenue}</td></tr>`).join("")}
+          </table>
+          
+          <h3>توزيع حالات الطلبات</h3>
+          <table border="1">
+            <tr><th>الحالة</th><th>العدد</th></tr>
+            ${statusData.map(row => `<tr><td>${row.name}</td><td>${row.value}</td></tr>`).join("")}
+          </table>
+          
+          <h3>الطلبات حسب الفئة</h3>
+          <table border="1">
+            <tr><th>الفئة</th><th>عدد الطلبات</th><th>الإيرادات (د.م)</th></tr>
+            ${categoryData.map(row => `<tr><td>${row.name}</td><td>${row.orders}</td><td>${row.revenue}</td></tr>`).join("")}
+          </table>
+          
+          <h3>نمو المستخدمين</h3>
+          <table border="1">
+            <tr><th>التاريخ</th><th>المستخدمين الجدد</th><th>الطاهيات الجدد</th><th>العاملات الجدد</th></tr>
+            ${userGrowthData.map(row => `<tr><td>${row.date}</td><td>${row.users}</td><td>${row.cooks}</td><td>${row.workers}</td></tr>`).join("")}
+          </table>
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob([htmlContent], { type: "application/vnd.ms-excel;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `analytics_report_${timeRangeLabel}_${format(new Date(), "yyyy-MM-dd")}.xls`;
+      link.click();
+      
+      toast({
+        title: "تم التصدير بنجاح",
+        description: "تم تحميل ملف Excel",
+      });
+    } catch (error) {
+      toast({
+        title: "خطأ في التصدير",
+        description: "حدث خطأ أثناء تصدير البيانات",
+        variant: "destructive",
+      });
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const printReport = () => {
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>تقرير التحليلات</title>
+        <style>
+          body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; padding: 20px; direction: rtl; }
+          h1 { color: #1a1a1a; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; }
+          h2 { color: #374151; margin-top: 30px; }
+          table { width: 100%; border-collapse: collapse; margin: 15px 0; }
+          th, td { border: 1px solid #e5e7eb; padding: 12px; text-align: right; }
+          th { background-color: #f3f4f6; font-weight: 600; }
+          tr:nth-child(even) { background-color: #f9fafb; }
+          .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin: 20px 0; }
+          .stat-card { background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; }
+          .stat-value { font-size: 24px; font-weight: bold; color: #1a1a1a; }
+          .stat-label { color: #6b7280; font-size: 14px; }
+          .positive { color: #10b981; }
+          .negative { color: #ef4444; }
+          @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+        </style>
+      </head>
+      <body>
+        <h1>تقرير التحليلات - ${new Date().toLocaleDateString("ar-MA")}</h1>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">${stats.totalRevenue.toLocaleString()} د.م</div>
+            <div class="stat-label">إجمالي الإيرادات</div>
+            <div class="${stats.revenueGrowth >= 0 ? 'positive' : 'negative'}">${stats.revenueGrowth >= 0 ? '+' : ''}${stats.revenueGrowth}%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.totalOrders}</div>
+            <div class="stat-label">إجمالي الطلبات</div>
+            <div class="${stats.ordersGrowth >= 0 ? 'positive' : 'negative'}">${stats.ordersGrowth >= 0 ? '+' : ''}${stats.ordersGrowth}%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.avgOrderValue} د.م</div>
+            <div class="stat-label">متوسط قيمة الطلب</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">${stats.conversionRate}%</div>
+            <div class="stat-label">معدل التحويل</div>
+          </div>
+        </div>
+
+        <h2>بيانات الإيرادات اليومية</h2>
+        <table>
+          <thead><tr><th>التاريخ</th><th>عدد الطلبات</th><th>الإيرادات (د.م)</th></tr></thead>
+          <tbody>${ordersData.map(row => `<tr><td>${row.date}</td><td>${row.orders}</td><td>${row.revenue.toLocaleString()}</td></tr>`).join("")}</tbody>
+        </table>
+
+        <h2>توزيع حالات الطلبات</h2>
+        <table>
+          <thead><tr><th>الحالة</th><th>العدد</th></tr></thead>
+          <tbody>${statusData.map(row => `<tr><td>${row.name}</td><td>${row.value}</td></tr>`).join("")}</tbody>
+        </table>
+
+        <h2>الطلبات حسب الفئة</h2>
+        <table>
+          <thead><tr><th>الفئة</th><th>عدد الطلبات</th><th>الإيرادات (د.م)</th></tr></thead>
+          <tbody>${categoryData.map(row => `<tr><td>${row.name}</td><td>${row.orders}</td><td>${row.revenue.toLocaleString()}</td></tr>`).join("")}</tbody>
+        </table>
+
+        <h2>نمو المستخدمين</h2>
+        <table>
+          <thead><tr><th>التاريخ</th><th>المستخدمين الجدد</th><th>الطاهيات الجدد</th><th>العاملات الجدد</th></tr></thead>
+          <tbody>${userGrowthData.map(row => `<tr><td>${row.date}</td><td>${row.users}</td><td>${row.cooks}</td><td>${row.workers}</td></tr>`).join("")}</tbody>
+        </table>
+
+        <script>window.onload = function() { window.print(); }</script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   useEffect(() => {
     loadAnalytics();
@@ -228,24 +445,52 @@ const AdminAnalyticsTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with Time Range Selector */}
-      <div className="flex items-center justify-between">
+      {/* Header with Time Range Selector and Export */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold">التقارير والإحصائيات</h2>
           <p className="text-muted-foreground">تحليل شامل لأداء المنصة</p>
         </div>
-        <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-40">
-            <Calendar className="h-4 w-4 ml-2" />
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="7">آخر 7 أيام</SelectItem>
-            <SelectItem value="30">آخر 30 يوم</SelectItem>
-            <SelectItem value="90">آخر 3 أشهر</SelectItem>
-            <SelectItem value="365">آخر سنة</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex items-center gap-3">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" disabled={exporting}>
+                {exporting ? (
+                  <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4 ml-2" />
+                )}
+                تصدير التقرير
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={exportToCSV}>
+                <FileText className="h-4 w-4 ml-2" />
+                تصدير CSV
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportToExcel}>
+                <FileSpreadsheet className="h-4 w-4 ml-2" />
+                تصدير Excel
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={printReport}>
+                <FileText className="h-4 w-4 ml-2" />
+                طباعة / PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Select value={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-40">
+              <Calendar className="h-4 w-4 ml-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="7">آخر 7 أيام</SelectItem>
+              <SelectItem value="30">آخر 30 يوم</SelectItem>
+              <SelectItem value="90">آخر 3 أشهر</SelectItem>
+              <SelectItem value="365">آخر سنة</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Key Metrics */}
