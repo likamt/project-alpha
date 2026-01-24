@@ -8,6 +8,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Generate 6-digit OTP code
+function generateOTP(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -28,14 +33,13 @@ serve(async (req) => {
     console.log('Sending email to:', email)
     console.log('Email action type:', email_action_type)
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? ''
-    const confirmationLink = redirect_to || supabaseUrl
+    // Generate OTP code instead of using token/link
+    const otpCode = token || generateOTP();
 
     const html = generateEmailHTML({
       email_action_type: email_action_type || 'signup',
       user_name,
-      token,
-      confirmationLink,
+      otpCode,
     })
 
     const { data, error } = await resend.emails.send({
@@ -53,7 +57,7 @@ serve(async (req) => {
     console.log('Email sent successfully:', data)
 
     return new Response(
-      JSON.stringify({ success: true, data }),
+      JSON.stringify({ success: true, data, otpCode }),
       {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
@@ -77,15 +81,17 @@ function getEmailSubject(emailActionType: string): string {
   switch (emailActionType) {
     case 'signup':
     case 'email':
-      return 'تأكيد بريدك الإلكتروني - خدمة سريعة'
+      return 'رمز التحقق - خدمة سريعة'
     case 'recovery':
-      return 'استرجاع كلمة المرور - خدمة سريعة'
+      return 'رمز استرجاع كلمة المرور - خدمة سريعة'
     case 'invite':
       return 'دعوة للانضمام - خدمة سريعة'
     case 'order_confirmation':
       return 'تأكيد طلبك - خدمة سريعة'
     case 'new_order':
       return 'لديك طلب جديد! - خدمة سريعة'
+    case 'subscription_reminder':
+      return 'تذكير بتجديد الاشتراك - خدمة سريعة'
     default:
       return 'رسالة من خدمة سريعة'
   }
@@ -94,54 +100,57 @@ function getEmailSubject(emailActionType: string): string {
 interface EmailContent {
   email_action_type: string
   user_name?: string
-  token?: string
-  confirmationLink?: string
+  otpCode?: string
 }
 
-function generateEmailHTML({ email_action_type, user_name, token, confirmationLink }: EmailContent): string {
+function generateEmailHTML({ email_action_type, user_name, otpCode }: EmailContent): string {
   const getContent = () => {
     switch (email_action_type) {
       case 'signup':
       case 'email':
         return {
           heading: 'مرحباً بك في خدمة سريعة! 🎉',
-          description: 'شكراً لانضمامك إلى منصتنا. لتفعيل حسابك، يرجى تأكيد بريدك الإلكتروني.',
-          buttonText: 'تأكيد البريد الإلكتروني',
-          showToken: true,
+          description: 'شكراً لانضمامك إلى منصتنا. لتفعيل حسابك، يرجى إدخال الرمز التالي:',
+          showOTP: true,
         }
       case 'recovery':
         return {
           heading: 'استرجاع كلمة المرور',
-          description: 'لقد طلبت إعادة تعيين كلمة المرور الخاصة بك. انقر على الزر أدناه لإنشاء كلمة مرور جديدة.',
-          buttonText: 'إعادة تعيين كلمة المرور',
-          showToken: true,
+          description: 'لقد طلبت إعادة تعيين كلمة المرور الخاصة بك. أدخل الرمز التالي لإنشاء كلمة مرور جديدة:',
+          showOTP: true,
         }
       case 'order_confirmation':
         return {
           heading: 'تم استلام طلبك! ✅',
           description: 'شكراً لثقتك بنا. سيتم معالجة طلبك في أقرب وقت.',
-          buttonText: 'عرض الطلب',
-          showToken: false,
+          showOTP: false,
         }
       case 'new_order':
         return {
           heading: 'لديك طلب جديد! 🔔',
           description: 'تم استلام طلب جديد. يرجى مراجعته والرد في أقرب وقت.',
-          buttonText: 'عرض الطلب',
-          showToken: false,
+          showOTP: false,
+        }
+      case 'subscription_reminder':
+        return {
+          heading: 'تذكير بتجديد الاشتراك ⏰',
+          description: 'اشتراكك سينتهي قريباً. يرجى تجديده للاستمرار في استقبال الطلبات.',
+          showOTP: false,
         }
       default:
         return {
           heading: 'مرحباً!',
           description: 'لديك رسالة مهمة من خدمة سريعة.',
-          buttonText: 'المتابعة',
-          showToken: false,
+          showOTP: false,
         }
     }
   }
 
   const content = getContent()
   const greeting = user_name ? `مرحباً ${user_name}،` : ''
+
+  // Format OTP code with spaces for better readability
+  const formattedOTP = otpCode ? otpCode.split('').join(' ') : ''
 
   return `
 <!DOCTYPE html>
@@ -155,67 +164,64 @@ function generateEmailHTML({ email_action_type, user_name, token, confirmationLi
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f6f9fc;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
-        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden;">
           
           <!-- Header -->
           <tr>
-            <td style="background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); padding: 30px 40px; text-align: center;">
-              <h1 style="color: #ffffff; font-size: 28px; font-weight: bold; margin: 0;">خدمة سريعة</h1>
+            <td style="background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); padding: 40px; text-align: center;">
+              <h1 style="color: #ffffff; font-size: 32px; font-weight: bold; margin: 0;">خدمة سريعة</h1>
+              <p style="color: #dcfce7; font-size: 14px; margin: 8px 0 0 0;">منصة الخدمات المنزلية</p>
             </td>
           </tr>
           
           <!-- Content -->
           <tr>
-            <td style="padding: 40px;">
-              <h2 style="color: #1f2937; font-size: 24px; font-weight: bold; text-align: center; margin: 0 0 20px 0;">
+            <td style="padding: 48px 40px;">
+              <h2 style="color: #1f2937; font-size: 26px; font-weight: bold; text-align: center; margin: 0 0 24px 0;">
                 ${content.heading}
               </h2>
               
-              ${greeting ? `<p style="color: #4b5563; font-size: 16px; line-height: 26px; text-align: center; margin: 16px 0;">${greeting}</p>` : ''}
+              ${greeting ? `<p style="color: #4b5563; font-size: 18px; line-height: 28px; text-align: center; margin: 16px 0;">${greeting}</p>` : ''}
               
-              <p style="color: #4b5563; font-size: 16px; line-height: 26px; text-align: center; margin: 16px 0;">
+              <p style="color: #4b5563; font-size: 16px; line-height: 28px; text-align: center; margin: 16px 0 32px 0;">
                 ${content.description}
               </p>
               
-              <!-- Button -->
-              ${confirmationLink ? `
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin: 32px 0;">
-                <tr>
-                  <td align="center">
-                    <a href="${confirmationLink}" target="_blank" style="display: inline-block; background: linear-gradient(135deg, #16a34a 0%, #22c55e 100%); border-radius: 8px; color: #ffffff; font-size: 16px; font-weight: bold; text-decoration: none; padding: 14px 40px;">
-                      ${content.buttonText}
-                    </a>
-                  </td>
-                </tr>
-              </table>
+              <!-- OTP Code Box -->
+              ${content.showOTP && otpCode ? `
+              <div style="text-align: center; margin: 32px 0;">
+                <div style="display: inline-block; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #22c55e; border-radius: 16px; padding: 24px 48px;">
+                  <p style="color: #166534; font-size: 14px; font-weight: 600; margin: 0 0 12px 0; letter-spacing: 1px;">رمز التحقق</p>
+                  <div style="background-color: #ffffff; border-radius: 12px; padding: 16px 32px; box-shadow: 0 2px 8px rgba(34, 197, 94, 0.2);">
+                    <span style="font-family: 'Courier New', monospace; font-size: 36px; font-weight: bold; color: #16a34a; letter-spacing: 8px;">
+                      ${formattedOTP}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <p style="color: #9ca3af; font-size: 14px; text-align: center; margin: 24px 0 0 0;">
+                ⏱️ هذا الرمز صالح لمدة 10 دقائق فقط
+              </p>
               ` : ''}
               
-              <!-- Token -->
-              ${content.showToken && token ? `
-              <p style="color: #9ca3af; font-size: 14px; text-align: center; margin: 24px 0 8px 0;">
-                أو انسخ هذا الرمز والصقه في التطبيق:
-              </p>
-              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                <tr>
-                  <td align="center">
-                    <code style="display: inline-block; padding: 16px 32px; background-color: #f3f4f6; border-radius: 8px; border: 1px solid #e5e7eb; color: #1f2937; font-size: 24px; font-weight: bold; letter-spacing: 4px;">
-                      ${token}
-                    </code>
-                  </td>
-                </tr>
-              </table>
-              ` : ''}
+              <!-- Security Notice -->
+              <div style="background-color: #fef3c7; border-radius: 12px; padding: 16px 20px; margin: 32px 0;">
+                <p style="color: #92400e; font-size: 14px; margin: 0; text-align: center;">
+                  🔒 لا تشارك هذا الرمز مع أي شخص. فريق خدمة سريعة لن يطلب منك الرمز أبداً.
+                </p>
+              </div>
             </td>
           </tr>
           
           <!-- Footer -->
           <tr>
             <td style="padding: 24px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
-              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 4px 0;">
+              <p style="color: #9ca3af; font-size: 13px; text-align: center; margin: 4px 0;">
                 إذا لم تطلب هذا البريد، يمكنك تجاهله بأمان.
               </p>
-              <p style="color: #9ca3af; font-size: 12px; text-align: center; margin: 4px 0;">
-                © 2024 خدمة سريعة - جميع الحقوق محفوظة
+              <p style="color: #9ca3af; font-size: 13px; text-align: center; margin: 4px 0;">
+                © ${new Date().getFullYear()} خدمة سريعة - جميع الحقوق محفوظة
               </p>
             </td>
           </tr>
