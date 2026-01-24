@@ -88,7 +88,6 @@ const Navbar = () => {
 
   const navLinks = [
     { name: t("common.home"), path: "/" },
-    { name: t("nav.craftsmen"), path: "/craftsmen" },
     { name: t("nav.houseWorkers"), path: "/house-workers" },
     { name: t("nav.homeCooking"), path: "/home-cooking" },
     { name: t("common.howItWorks"), path: "/how-it-works" },
@@ -187,13 +186,13 @@ const Navbar = () => {
                   variant="outline"
                   onClick={() => navigate("/join-house-worker")}
                 >
-                  {t("nav.joinAs")}
+                  انضمي كعاملة
                 </Button>
                 <Button 
-                  className="bg-gradient-primary hover:opacity-90"
-                  onClick={() => navigate("/join")}
+                  className="bg-orange-500 hover:bg-orange-600"
+                  onClick={() => navigate("/join-home-cook")}
                 >
-                  {t("nav.craftsmen")}
+                  انضمي كطاهية
                 </Button>
               </div>
             )}
@@ -288,13 +287,13 @@ const Navbar = () => {
                   انضمي كعاملة
                 </Button>
                 <Button 
-                  className="w-full bg-gradient-primary"
+                  className="w-full bg-orange-500 hover:bg-orange-600"
                   onClick={() => {
-                    navigate("/join");
+                    navigate("/join-home-cook");
                     setIsOpen(false);
                   }}
                 >
-                  انضم كحرفي
+                  انضمي كطاهية
                 </Button>
               </>
             )}

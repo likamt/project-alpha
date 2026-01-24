@@ -7,22 +7,18 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import AdminDashboard from "./pages/AdminDashboard";
 import Profile from "./pages/Profile";
-import JoinAsCraftsman from "./pages/JoinAsCraftsman";
 import JoinAsHouseWorker from "./pages/JoinAsHouseWorker";
 import JoinAsHomeCook from "./pages/JoinAsHomeCook";
 import HowItWorks from "./pages/HowItWorks";
 import HouseWorkers from "./pages/HouseWorkers";
 import HouseWorkerProfile from "./pages/HouseWorkerProfile";
+import HouseWorkerDashboard from "./pages/HouseWorkerDashboard";
 import HomeCooking from "./pages/HomeCooking";
 import HomeCookProfile from "./pages/HomeCookProfile";
 import HomeCookDashboard from "./pages/HomeCookDashboard";
 import OrderSuccess from "./pages/OrderSuccess";
 import MyOrders from "./pages/MyOrders";
 import Messages from "./pages/Messages";
-import Craftsmen from "./pages/Craftsmen";
-import CraftsmanProfile from "./pages/CraftsmanProfile";
-import CraftsmanDashboard from "./pages/CraftsmanDashboard";
-import HouseWorkerDashboard from "./pages/HouseWorkerDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -38,7 +34,6 @@ const App = () => (
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/join" element={<JoinAsCraftsman />} />
           <Route path="/join-house-worker" element={<JoinAsHouseWorker />} />
           <Route path="/join-home-cook" element={<JoinAsHomeCook />} />
           <Route path="/house-workers" element={<HouseWorkers />} />
@@ -50,9 +45,6 @@ const App = () => (
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/my-orders" element={<MyOrders />} />
           <Route path="/messages" element={<Messages />} />
-          <Route path="/craftsmen" element={<Craftsmen />} />
-          <Route path="/craftsman/:id" element={<CraftsmanProfile />} />
-          <Route path="/craftsman-dashboard" element={<CraftsmanDashboard />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
