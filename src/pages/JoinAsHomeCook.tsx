@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LocationSelector from "@/components/LocationSelector";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -28,6 +30,7 @@ const specialtiesList = [
 const JoinAsHomeCook = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState({
@@ -37,6 +40,8 @@ const JoinAsHomeCook = () => {
     minOrderAmount: "",
     deliveryAvailable: true,
     specialties: [] as string[],
+    countryId: "",
+    cityId: "",
   });
 
   useEffect(() => {
@@ -72,8 +77,17 @@ const JoinAsHomeCook = () => {
 
     if (formData.specialties.length === 0) {
       toast({
-        title: "خطأ",
+        title: t("common.error"),
         description: "يرجى اختيار تخصص واحد على الأقل",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!formData.countryId || !formData.cityId) {
+      toast({
+        title: t("common.error"),
+        description: t("common.selectLocation"),
         variant: "destructive",
       });
       return;
@@ -107,6 +121,8 @@ const JoinAsHomeCook = () => {
         min_order_amount: parseFloat(formData.minOrderAmount) || 0,
         delivery_available: formData.deliveryAvailable,
         specialties: formData.specialties,
+        country_id: formData.countryId,
+        city_id: formData.cityId,
       });
 
       if (cookError) throw cookError;
@@ -216,14 +232,22 @@ const JoinAsHomeCook = () => {
                   </div>
                 </div>
 
+                {/* Location Selection */}
+                <LocationSelector
+                  selectedCountryId={formData.countryId}
+                  selectedCityId={formData.cityId}
+                  onCountryChange={(id) => setFormData({ ...formData, countryId: id })}
+                  onCityChange={(id) => setFormData({ ...formData, cityId: id })}
+                  required
+                />
+
                 <div className="space-y-2">
-                  <Label htmlFor="location">الموقع / المدينة</Label>
+                  <Label htmlFor="location">العنوان التفصيلي</Label>
                   <Input
                     id="location"
-                    placeholder="الدار البيضاء، المغرب"
+                    placeholder="الحي، الشارع..."
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                    required
                   />
                 </div>
 

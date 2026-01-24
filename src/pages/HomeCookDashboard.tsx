@@ -64,7 +64,6 @@ interface FoodOrder {
   payment_status: string;
   delivery_address: string | null;
   client_confirmed_at: string | null;
-  cook_confirmed_at: string | null;
   created_at: string | null;
   dish: {
     name: string;
@@ -690,7 +689,6 @@ const HomeCookDashboard = () => {
                 <div className="space-y-4">
                   {orders.map(order => {
                     const status = statusLabels[order.status] || { label: order.status, color: "bg-gray-500" };
-                    const canConfirm = ["delivered", "ready"].includes(order.status) && !order.cook_confirmed_at;
                     
                     return (
                       <Card key={order.id}>
@@ -710,8 +708,27 @@ const HomeCookDashboard = () => {
                             <Badge className={status.color}>{status.label}</Badge>
                           </div>
                           
-                          {/* Status update buttons */}
-                          {order.status === "paid" && (
+                          {/* Status update buttons - الطباخة تحدث حالة الطلب */}
+                          {order.status === "pending" && (
+                            <div className="flex gap-2 mb-4">
+                              <Button 
+                                size="sm" 
+                                onClick={() => updateOrderStatus(order.id, "accepted")}
+                                className="bg-blue-500 hover:bg-blue-600"
+                              >
+                                قبول الطلب
+                              </Button>
+                              <Button 
+                                size="sm" 
+                                variant="destructive"
+                                onClick={() => updateOrderStatus(order.id, "cancelled")}
+                              >
+                                رفض
+                              </Button>
+                            </div>
+                          )}
+                          
+                          {order.status === "accepted" && (
                             <div className="flex gap-2 mb-4">
                               <Button 
                                 size="sm" 
@@ -747,51 +764,27 @@ const HomeCookDashboard = () => {
                             </div>
                           )}
                           
-                          {/* Confirmation status */}
-                          {!["completed", "cancelled", "pending"].includes(order.status) && (
-                            <div className="flex items-center gap-4 text-xs mb-3">
-                              <span className={order.client_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
-                                {order.client_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
-                                تأكيد العميل
-                              </span>
-                              <span className={order.cook_confirmed_at ? "text-green-600" : "text-muted-foreground"}>
-                                {order.cook_confirmed_at ? <CheckCircle className="h-4 w-4 inline ml-1" /> : <Clock className="h-4 w-4 inline ml-1" />}
-                                تأكيدك
-                              </span>
-                            </div>
-                          )}
-                          
-                          {/* Confirm delivery button */}
-                          {canConfirm && (
-                            <Button 
-                              onClick={() => confirmDelivery(order.id)}
-                              disabled={confirmingOrder === order.id}
-                              className="bg-green-600 hover:bg-green-700"
-                              size="sm"
-                            >
-                              {confirmingOrder === order.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <>
-                                  <CheckCircle className="h-4 w-4 ml-2" />
-                                  تأكيد التسليم
-                                </>
-                              )}
-                            </Button>
-                          )}
-                          
-                          {/* Escrow info */}
-                          {order.payment_status === "held" && (
-                            <div className="mt-3 p-2 bg-blue-50 rounded text-xs text-blue-700 flex items-center gap-2">
+                          {/* Cash payment notice */}
+                          {order.payment_status === "cash_pending" && (
+                            <div className="p-2 bg-orange-50 rounded text-xs text-orange-700 flex items-center gap-2 mb-3">
                               <AlertCircle className="h-4 w-4" />
-                              المبلغ محجوز - سيُحول لك بعد تأكيد الطرفين: {order.cook_amount} د.م
+                              الدفع نقداً عند الاستلام
                             </div>
                           )}
                           
+                          {/* Waiting for client confirmation */}
+                          {order.status === "delivered" && !order.client_confirmed_at && (
+                            <div className="p-2 bg-blue-50 rounded text-xs text-blue-700 flex items-center gap-2 mb-3">
+                              <Clock className="h-4 w-4" />
+                              في انتظار تأكيد الزبون لإكمال المهمة
+                            </div>
+                          )}
+                          
+                          {/* Completed */}
                           {order.status === "completed" && (
-                            <div className="mt-3 p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-2">
+                            <div className="p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-2 mb-3">
                               <CheckCircle className="h-4 w-4" />
-                              تم تحويل المبلغ: {order.cook_amount} د.م
+                              تم إكمال الطلب - المبلغ: {order.cook_amount} د.م
                             </div>
                           )}
                           

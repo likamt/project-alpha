@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Search, Star, MapPin, User, Home, Briefcase } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SearchFilters from "@/components/SearchFilters";
 
 const HouseWorkers = () => {
   const navigate = useNavigate();
@@ -18,23 +19,40 @@ const HouseWorkers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedWorkType, setSelectedWorkType] = useState("all");
+  const [selectedCountryId, setSelectedCountryId] = useState("");
+  const [selectedCityId, setSelectedCityId] = useState("");
   const [workers, setWorkers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadWorkers();
-  }, []);
+  }, [selectedCountryId, selectedCityId]);
 
   const loadWorkers = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from("house_workers")
         .select(`
           *,
           profile:profiles(full_name, avatar_url)
         `)
-        .order("rating", { ascending: false });
+        // فقط المشتركين النشطين أو في فترة التجربة
+        .in("subscription_status", ["trial", "active", "trialing"])
+        // الترتيب الذكي: التقييم ثم المهام المكتملة ثم النشاط الأخير
+        .order("rating", { ascending: false })
+        .order("completed_orders", { ascending: false })
+        .order("last_activity_at", { ascending: false, nullsFirst: false });
+
+      // تصفية حسب الموقع
+      if (selectedCountryId && selectedCountryId !== "all") {
+        query = query.eq("country_id", selectedCountryId);
+      }
+      if (selectedCityId && selectedCityId !== "all") {
+        query = query.eq("city_id", selectedCityId);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
       setWorkers(data || []);
@@ -120,6 +138,20 @@ const HouseWorkers = () => {
             {t('houseWorker.subtitle')}
           </p>
         </div>
+
+        {/* Location Filters */}
+        <SearchFilters
+          selectedCountryId={selectedCountryId}
+          selectedCityId={selectedCityId}
+          onCountryChange={setSelectedCountryId}
+          onCityChange={setSelectedCityId}
+          onClearFilters={() => {
+            setSelectedCountryId("");
+            setSelectedCityId("");
+            setSelectedCategory("all");
+            setSelectedWorkType("all");
+          }}
+        />
 
         {/* Search and Filters */}
         <div className="max-w-4xl mx-auto mb-12 animate-scale-in space-y-4">
