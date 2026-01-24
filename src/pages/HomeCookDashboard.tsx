@@ -20,7 +20,8 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortfolioUploader from "@/components/PortfolioUploader";
-import DishImageUploader from "@/components/DishImageUploader";
+import MultiDishImageUploader from "@/components/MultiDishImageUploader";
+import { useTranslation } from "react-i18next";
 
 interface FoodDish {
   id: string;
@@ -32,6 +33,7 @@ interface FoodDish {
   servings: number | null;
   dietary_tags: string[] | null;
   image_url: string | null;
+  images: string[] | null;
   is_available: boolean | null;
   rating: number | null;
   order_count: number | null;
@@ -79,6 +81,7 @@ const categories = [
 ];
 
 const HomeCookDashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [user, setUser] = useState<any>(null);
@@ -100,7 +103,7 @@ const HomeCookDashboard = () => {
     preparation_time_minutes: "60",
     servings: "1",
     dietary_tags: "",
-    image_url: "",
+    images: [] as string[],
     is_available: true,
   });
 
@@ -260,7 +263,7 @@ const HomeCookDashboard = () => {
       preparation_time_minutes: "60",
       servings: "1",
       dietary_tags: "",
-      image_url: "",
+      images: [],
       is_available: true,
     });
     setEditingDish(null);
@@ -276,7 +279,7 @@ const HomeCookDashboard = () => {
       preparation_time_minutes: (dish.preparation_time_minutes || 60).toString(),
       servings: (dish.servings || 1).toString(),
       dietary_tags: dish.dietary_tags?.join(", ") || "",
-      image_url: dish.image_url || "",
+      images: dish.images || (dish.image_url ? [dish.image_url] : []),
       is_available: dish.is_available ?? true,
     });
     setDialogOpen(true);
@@ -305,7 +308,8 @@ const HomeCookDashboard = () => {
         preparation_time_minutes: parseInt(dishForm.preparation_time_minutes) || 60,
         servings: parseInt(dishForm.servings) || 1,
         dietary_tags: dishForm.dietary_tags ? dishForm.dietary_tags.split(",").map(t => t.trim()) : [],
-        image_url: dishForm.image_url || null,
+        images: dishForm.images,
+        image_url: dishForm.images[0] || null,
         is_available: dishForm.is_available,
       };
 
@@ -578,12 +582,13 @@ const HomeCookDashboard = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>صورة الطبق</Label>
+                    <Label>{t("dishes.images")}</Label>
                     {cookProfile && (
-                      <DishImageUploader
-                        imageUrl={dishForm.image_url}
-                        onImageChange={(url) => setDishForm({ ...dishForm, image_url: url })}
+                      <MultiDishImageUploader
+                        images={dishForm.images}
+                        onImagesChange={(urls) => setDishForm({ ...dishForm, images: urls })}
                         cookId={cookProfile.id}
+                        maxImages={10}
                       />
                     )}
                   </div>
