@@ -4,7 +4,7 @@
     "services": "الخدمات",
     "howItWorks": "كيف يعمل",
     "login": "تسجيل الدخول",
-    "register": "إنشاء حساب",
+    "register": "التسجيل",
     "logout": "تسجيل الخروج",
     "profile": "الملف الشخصي",
     "messages": "الرسائل",
@@ -26,33 +26,46 @@
     "previous": "السابق",
     "close": "إغلاق",
     "submit": "إرسال",
-    "currency": "د.م",
-    "language": "اللغة"
+    "currency": "درهم",
+    "language": "اللغة",
+    "verified": "موثق",
+    "unverified": "غير موثق",
+    "perHour": "درهم/ساعة",
+    "completedOrders": "طلب مكتمل",
+    "rating": "التقييم",
+    "viewProfile": "عرض الملف",
+    "contact": "تواصل",
+    "call": "اتصل",
+    "sendMessage": "راسل",
+    "noResults": "لا توجد نتائج",
+    "tryAgain": "حاول مرة أخرى"
   },
   "nav": {
     "homeCooking": "الطبخ المنزلي",
-    "houseWorkers": "عاملات المنزل",
+    "houseWorkers": "العاملات المنزليات",
     "craftsmen": "الحرفيون",
-    "joinAs": "انضم كـ"
+    "joinAs": "انضم كـ",
+    "joinAsCook": "انضمي كطاهية",
+    "joinAsWorker": "انضمي كعاملة"
   },
   "hero": {
     "title": "خدمة سريعة",
-    "subtitle": "منصة متكاملة للخدمات المنزلية",
-    "description": "اطلب خدمات الطبخ المنزلي، عمال المنازل، والحرفيين بكل سهولة",
+    "subtitle": "منصة الخدمات المنزلية المتكاملة",
+    "description": "اطلب خدمات الطبخ والتنظيف والصيانة بسهولة",
     "cta": "استكشف الخدمات"
   },
   "services": {
     "homeCooking": {
       "title": "الطبخ المنزلي",
-      "description": "أطباق منزلية لذيذة من طاهيات محترفات"
+      "description": "أطباق شهية من طاهيات محترفات"
     },
     "houseWorkers": {
-      "title": "عاملات المنزل",
-      "description": "خدمات تنظيف واعتناء بالمنزل"
+      "title": "العاملات المنزليات",
+      "description": "خدمات التنظيف والرعاية المنزلية"
     },
     "craftsmen": {
       "title": "الحرفيون",
-      "description": "خدمات صيانة وإصلاح متنوعة"
+      "description": "خدمات الصيانة والإصلاح"
     }
   },
   "dishes": {
@@ -63,10 +76,10 @@
     "category": "الفئة",
     "price": "السعر",
     "prepTime": "وقت التحضير",
-    "servings": "عدد الأشخاص",
-    "tags": "التصنيفات",
+    "servings": "الحصص",
+    "tags": "العلامات",
     "images": "صور الطبق",
-    "available": "متاح للطلب",
+    "available": "متاح",
     "unavailable": "غير متاح",
     "orderNow": "اطلب الآن",
     "addToCart": "أضف للسلة",
@@ -74,13 +87,13 @@
     "uploadImages": "رفع الصور",
     "maxImages": "الحد الأقصى {{count}} صور",
     "categories": {
-      "main": "أطباق رئيسية",
-      "appetizer": "مقبلات",
-      "dessert": "حلويات",
-      "breakfast": "فطور",
-      "soup": "شوربات",
-      "salad": "سلطات",
-      "pastry": "معجنات"
+      "main": "الأطباق الرئيسية",
+      "appetizer": "المقبلات",
+      "dessert": "الحلويات",
+      "breakfast": "الفطور",
+      "soup": "الشوربات",
+      "salad": "السلطات",
+      "pastry": "المعجنات"
     }
   },
   "orders": {
@@ -88,22 +101,24 @@
     "orderDetails": "تفاصيل الطلب",
     "orderStatus": "حالة الطلب",
     "pending": "في انتظار الدفع",
-    "paid": "تم الدفع",
-    "preparing": "جاري التحضير",
-    "ready": "جاهز للتسليم",
+    "paid": "مدفوع",
+    "preparing": "قيد التحضير",
+    "ready": "جاهز",
     "delivered": "تم التوصيل",
     "completed": "مكتمل",
     "cancelled": "ملغي",
     "deliveryAddress": "عنوان التوصيل",
     "totalAmount": "المبلغ الإجمالي",
-    "quantity": "الكمية"
+    "quantity": "الكمية",
+    "newOrder": "طلب جديد",
+    "confirmDelivery": "تأكيد التسليم"
   },
   "auth": {
     "email": "البريد الإلكتروني",
     "password": "كلمة المرور",
     "confirmPassword": "تأكيد كلمة المرور",
     "fullName": "الاسم الكامل",
-    "phone": "رقم الهاتف",
+    "phone": "الهاتف",
     "signIn": "تسجيل الدخول",
     "signUp": "إنشاء حساب",
     "forgotPassword": "نسيت كلمة المرور؟",
@@ -113,10 +128,10 @@
   "upload": {
     "uploading": "جاري الرفع...",
     "uploadSuccess": "تم رفع الصورة بنجاح",
-    "uploadError": "خطأ في رفع الصورة",
-    "compressing": "جاري ضغط الصورة...",
+    "uploadError": "خطأ في الرفع",
+    "compressing": "جاري الضغط...",
     "selectImage": "اختر صورة",
-    "dragDrop": "اسحب وأفلت الصور هنا",
+    "dragDrop": "اسحب وأفلت هنا",
     "maxSize": "الحد الأقصى {{size}} ميجابايت",
     "invalidType": "نوع الملف غير مدعوم"
   },
@@ -126,5 +141,133 @@
     "termsOfService": "شروط الخدمة",
     "privacyPolicy": "سياسة الخصوصية",
     "allRightsReserved": "جميع الحقوق محفوظة"
+  },
+  "houseWorker": {
+    "title": "العاملات المنزليات",
+    "subtitle": "احصل على خدمات منزلية موثوقة من عاملات محترفات ومعتمدات",
+    "searchPlaceholder": "ابحث عن عاملة حسب الخدمة أو المدينة...",
+    "noWorkersFound": "لم يتم العثور على عاملات",
+    "noWorkersAvailable": "لا توجد عاملات متاحة حالياً",
+    "joinCta": "انضمي كعاملة منزلية",
+    "joinTitle": "هل ترغبين في الانضمام لفريقنا؟",
+    "joinDescription": "انضمي إلى منصتنا واحصلي على فرص عمل متنوعة ودخل مضمون",
+    "registerNow": "سجلي الآن",
+    "workerInfo": "معلومات العاملة",
+    "fillForm": "املئي البيانات التالية للانضمام إلى منصتنا",
+    "servicesOffered": "الخدمات المقدمة",
+    "experienceDescription": "نبذة عن خبرتك",
+    "experiencePlaceholder": "اكتبي نبذة عن خبرتك ومهاراتك...",
+    "hourlyRate": "السعر بالساعة (درهم)",
+    "cityRegion": "المدينة / المنطقة",
+    "benefits": "ما ستحصلين عليه:",
+    "benefitsList": {
+      "work": "فرصة عمل من المنزل أو بالانتقال",
+      "orders": "طلبات متنوعة من عائلات وشركات",
+      "income": "دخل مضمون ومرونة في العمل",
+      "protection": "حماية وضمان حقوقك",
+      "support": "دعم فني متواصل"
+    },
+    "submitRequest": "تقديم الطلب",
+    "registering": "جاري التسجيل...",
+    "noAccountPrompt": "ليس لديك حساب؟",
+    "registerLink": "سجلي الآن",
+    "joinConditions": "شروط الانضمام:",
+    "conditionsList": {
+      "experience": "خبرة في مجال الخدمات المنزلية",
+      "punctuality": "الالتزام بمواعيد العمل المتفق عليها",
+      "professionalism": "التعامل الاحترافي والأمانة",
+      "quality": "جودة عمل عالية ونظافة تامة"
+    },
+    "workType": "نوع العمل",
+    "workTypes": {
+      "permanent": "دائم",
+      "partTime": "جزئي",
+      "flexible": "مرن حسب الحاجة",
+      "daily": "يومي"
+    },
+    "serviceCategory": "صنف الخدمة",
+    "serviceCategories": {
+      "general": "خدمات عامة",
+      "cleaning": "تنظيف",
+      "childcare": "رعاية الأطفال",
+      "eldercare": "رعاية كبار السن",
+      "cooking": "طبخ منزلي",
+      "laundry": "غسيل وكي",
+      "comprehensive": "مساعدة شاملة"
+    },
+    "services": {
+      "houseCleaning": "تنظيف المنازل",
+      "laundry": "غسيل الملابس",
+      "ironing": "كي الملابس",
+      "organizing": "ترتيب المنزل",
+      "childcare": "رعاية الأطفال",
+      "eldercare": "رعاية كبار السن",
+      "homeCooking": "طبخ منزلي",
+      "comprehensive": "مساعدة منزلية شاملة"
+    },
+    "experienceYears": "سنوات الخبرة",
+    "nationality": "الجنسية",
+    "languages": "اللغات",
+    "languagesList": {
+      "arabic": "العربية",
+      "french": "الفرنسية",
+      "english": "الإنجليزية",
+      "spanish": "الإسبانية"
+    },
+    "availability": "أوقات التوفر",
+    "availableDays": "أيام العمل المتاحة",
+    "days": {
+      "monday": "الإثنين",
+      "tuesday": "الثلاثاء",
+      "wednesday": "الأربعاء",
+      "thursday": "الخميس",
+      "friday": "الجمعة",
+      "saturday": "السبت",
+      "sunday": "الأحد"
+    },
+    "workHours": "ساعات العمل",
+    "from": "من",
+    "to": "إلى",
+    "portfolio": "معرض الأعمال",
+    "about": "نبذة",
+    "aboutWorker": "عن العاملة",
+    "workerNotFound": "العاملة غير موجودة",
+    "workerNotFoundDesc": "لم نتمكن من العثور على هذه العاملة",
+    "backToWorkers": "العودة للعاملات",
+    "noPortfolioImages": "لا توجد صور في المعرض بعد",
+    "availableServices": "الخدمات المتاحة"
+  },
+  "dashboard": {
+    "overview": "نظرة عامة",
+    "statistics": "الإحصائيات",
+    "totalRevenue": "إجمالي الإيرادات",
+    "totalOrders": "إجمالي الطلبات",
+    "pendingOrders": "طلبات معلقة",
+    "completedOrders": "طلبات مكتملة",
+    "successRate": "نسبة النجاح",
+    "averageRating": "متوسط التقييم",
+    "recentOrders": "الطلبات الأخيرة",
+    "manageMenu": "إدارة القائمة",
+    "manageServices": "إدارة الخدمات",
+    "portfolio": "معرض الأعمال",
+    "messages": "الرسائل",
+    "settings": "الإعدادات",
+    "noOrders": "لا توجد طلبات",
+    "noMessages": "لا توجد رسائل"
+  },
+  "ratings": {
+    "title": "التقييمات",
+    "rateService": "قيّم الخدمة",
+    "rateFood": "قيّم الطعام",
+    "yourRating": "تقييمك",
+    "comment": "تعليقك (اختياري)",
+    "commentPlaceholder": "اكتب تعليقك هنا...",
+    "submitRating": "إرسال التقييم",
+    "ratingSuccess": "تم إرسال التقييم بنجاح",
+    "ratingError": "حدث خطأ في إرسال التقييم",
+    "noRatings": "لا توجد تقييمات بعد",
+    "averageRating": "متوسط التقييم",
+    "totalRatings": "إجمالي التقييمات",
+    "reviews": "المراجعات"
   }
 }

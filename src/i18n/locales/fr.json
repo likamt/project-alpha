@@ -27,18 +27,31 @@
     "close": "Fermer",
     "submit": "Soumettre",
     "currency": "DH",
-    "language": "Langue"
+    "language": "Langue",
+    "verified": "Vérifié",
+    "unverified": "Non vérifié",
+    "perHour": "DH/heure",
+    "completedOrders": "commandes terminées",
+    "rating": "Évaluation",
+    "viewProfile": "Voir le profil",
+    "contact": "Contacter",
+    "call": "Appeler",
+    "sendMessage": "Envoyer un message",
+    "noResults": "Aucun résultat",
+    "tryAgain": "Réessayer"
   },
   "nav": {
     "homeCooking": "Cuisine maison",
     "houseWorkers": "Aides ménagères",
     "craftsmen": "Artisans",
-    "joinAs": "Rejoindre en tant que"
+    "joinAs": "Rejoindre en tant que",
+    "joinAsCook": "Devenir cuisinière",
+    "joinAsWorker": "Devenir aide ménagère"
   },
   "hero": {
     "title": "Service Rapide",
     "subtitle": "Plateforme complète de services à domicile",
-    "description": "Commandez des services de cuisine, d'entretien et d'artisanat facilement",
+    "description": "Commandez des services de cuisine, d'entretien et de maintenance facilement",
     "cta": "Découvrir les services"
   },
   "services": {
@@ -96,7 +109,9 @@
     "cancelled": "Annulé",
     "deliveryAddress": "Adresse de livraison",
     "totalAmount": "Montant total",
-    "quantity": "Quantité"
+    "quantity": "Quantité",
+    "newOrder": "Nouvelle commande",
+    "confirmDelivery": "Confirmer la livraison"
   },
   "auth": {
     "email": "Email",
@@ -126,5 +141,133 @@
     "termsOfService": "Conditions d'utilisation",
     "privacyPolicy": "Politique de confidentialité",
     "allRightsReserved": "Tous droits réservés"
+  },
+  "houseWorker": {
+    "title": "Aides ménagères professionnelles",
+    "subtitle": "Obtenez des services ménagers fiables de travailleuses professionnelles et vérifiées",
+    "searchPlaceholder": "Rechercher une aide par service ou ville...",
+    "noWorkersFound": "Aucune aide trouvée",
+    "noWorkersAvailable": "Aucune aide disponible pour le moment",
+    "joinCta": "Devenir aide ménagère",
+    "joinTitle": "Vous souhaitez rejoindre notre équipe?",
+    "joinDescription": "Rejoignez notre plateforme et obtenez diverses opportunités d'emploi avec un revenu garanti",
+    "registerNow": "Inscrivez-vous maintenant",
+    "workerInfo": "Informations sur l'aide",
+    "fillForm": "Remplissez les informations suivantes pour rejoindre notre plateforme",
+    "servicesOffered": "Services proposés",
+    "experienceDescription": "À propos de votre expérience",
+    "experiencePlaceholder": "Écrivez sur votre expérience et vos compétences...",
+    "hourlyRate": "Tarif horaire (DH)",
+    "cityRegion": "Ville / Région",
+    "benefits": "Ce que vous obtiendrez:",
+    "benefitsList": {
+      "work": "Travail à domicile ou sur site",
+      "orders": "Commandes diverses de familles et entreprises",
+      "income": "Revenu garanti et flexibilité de travail",
+      "protection": "Protection et garantie des droits",
+      "support": "Support technique continu"
+    },
+    "submitRequest": "Soumettre la demande",
+    "registering": "Inscription en cours...",
+    "noAccountPrompt": "Pas de compte?",
+    "registerLink": "Inscrivez-vous maintenant",
+    "joinConditions": "Conditions d'adhésion:",
+    "conditionsList": {
+      "experience": "Expérience dans les services ménagers",
+      "punctuality": "Respect des horaires convenus",
+      "professionalism": "Conduite professionnelle et fiable",
+      "quality": "Travail de haute qualité et propreté"
+    },
+    "workType": "Type de travail",
+    "workTypes": {
+      "permanent": "Permanent",
+      "partTime": "Temps partiel",
+      "flexible": "Flexible selon les besoins",
+      "daily": "Journalier"
+    },
+    "serviceCategory": "Catégorie de service",
+    "serviceCategories": {
+      "general": "Services généraux",
+      "cleaning": "Nettoyage",
+      "childcare": "Garde d'enfants",
+      "eldercare": "Soins aux personnes âgées",
+      "cooking": "Cuisine maison",
+      "laundry": "Lessive et repassage",
+      "comprehensive": "Assistance complète"
+    },
+    "services": {
+      "houseCleaning": "Nettoyage de maison",
+      "laundry": "Lessive",
+      "ironing": "Repassage",
+      "organizing": "Organisation de maison",
+      "childcare": "Garde d'enfants",
+      "eldercare": "Soins aux personnes âgées",
+      "homeCooking": "Cuisine maison",
+      "comprehensive": "Assistance ménagère complète"
+    },
+    "experienceYears": "Années d'expérience",
+    "nationality": "Nationalité",
+    "languages": "Langues",
+    "languagesList": {
+      "arabic": "Arabe",
+      "french": "Français",
+      "english": "Anglais",
+      "spanish": "Espagnol"
+    },
+    "availability": "Disponibilité",
+    "availableDays": "Jours de travail disponibles",
+    "days": {
+      "monday": "Lundi",
+      "tuesday": "Mardi",
+      "wednesday": "Mercredi",
+      "thursday": "Jeudi",
+      "friday": "Vendredi",
+      "saturday": "Samedi",
+      "sunday": "Dimanche"
+    },
+    "workHours": "Heures de travail",
+    "from": "De",
+    "to": "À",
+    "portfolio": "Portfolio",
+    "about": "À propos",
+    "aboutWorker": "À propos de l'aide",
+    "workerNotFound": "Aide non trouvée",
+    "workerNotFoundDesc": "Nous n'avons pas pu trouver cette aide",
+    "backToWorkers": "Retour aux aides",
+    "noPortfolioImages": "Pas encore d'images dans le portfolio",
+    "availableServices": "Services disponibles"
+  },
+  "dashboard": {
+    "overview": "Aperçu",
+    "statistics": "Statistiques",
+    "totalRevenue": "Revenu total",
+    "totalOrders": "Total des commandes",
+    "pendingOrders": "Commandes en attente",
+    "completedOrders": "Commandes terminées",
+    "successRate": "Taux de réussite",
+    "averageRating": "Note moyenne",
+    "recentOrders": "Commandes récentes",
+    "manageMenu": "Gérer le menu",
+    "manageServices": "Gérer les services",
+    "portfolio": "Portfolio",
+    "messages": "Messages",
+    "settings": "Paramètres",
+    "noOrders": "Aucune commande",
+    "noMessages": "Aucun message"
+  },
+  "ratings": {
+    "title": "Évaluations",
+    "rateService": "Évaluer le service",
+    "rateFood": "Évaluer la nourriture",
+    "yourRating": "Votre note",
+    "comment": "Votre commentaire (optionnel)",
+    "commentPlaceholder": "Écrivez votre commentaire ici...",
+    "submitRating": "Soumettre l'évaluation",
+    "ratingSuccess": "Évaluation soumise avec succès",
+    "ratingError": "Erreur lors de la soumission",
+    "noRatings": "Pas encore d'évaluations",
+    "averageRating": "Note moyenne",
+    "totalRatings": "Total des évaluations",
+    "reviews": "Avis"
   }
 }

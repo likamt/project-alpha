@@ -27,18 +27,31 @@
     "close": "Close",
     "submit": "Submit",
     "currency": "MAD",
-    "language": "Language"
+    "language": "Language",
+    "verified": "Verified",
+    "unverified": "Unverified",
+    "perHour": "MAD/hour",
+    "completedOrders": "completed orders",
+    "rating": "Rating",
+    "viewProfile": "View Profile",
+    "contact": "Contact",
+    "call": "Call",
+    "sendMessage": "Send Message",
+    "noResults": "No results",
+    "tryAgain": "Try again"
   },
   "nav": {
     "homeCooking": "Home Cooking",
     "houseWorkers": "House Workers",
     "craftsmen": "Craftsmen",
-    "joinAs": "Join as"
+    "joinAs": "Join as",
+    "joinAsCook": "Join as Cook",
+    "joinAsWorker": "Join as Worker"
   },
   "hero": {
     "title": "Quick Service",
     "subtitle": "Complete Home Services Platform",
-    "description": "Order home cooking, cleaning, and craftsman services easily",
+    "description": "Order home cooking, cleaning, and maintenance services easily",
     "cta": "Explore Services"
   },
   "services": {
@@ -96,7 +109,9 @@
     "cancelled": "Cancelled",
     "deliveryAddress": "Delivery Address",
     "totalAmount": "Total Amount",
-    "quantity": "Quantity"
+    "quantity": "Quantity",
+    "newOrder": "New Order",
+    "confirmDelivery": "Confirm Delivery"
   },
   "auth": {
     "email": "Email",
@@ -126,5 +141,133 @@
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
     "allRightsReserved": "All rights reserved"
+  },
+  "houseWorker": {
+    "title": "Professional House Workers",
+    "subtitle": "Get reliable home services from professional and verified workers",
+    "searchPlaceholder": "Search for a worker by service or city...",
+    "noWorkersFound": "No workers found",
+    "noWorkersAvailable": "No workers available at the moment",
+    "joinCta": "Join as a House Worker",
+    "joinTitle": "Want to join our team?",
+    "joinDescription": "Join our platform and get diverse job opportunities with guaranteed income",
+    "registerNow": "Register Now",
+    "workerInfo": "Worker Information",
+    "fillForm": "Fill in the following information to join our platform",
+    "servicesOffered": "Services Offered",
+    "experienceDescription": "About Your Experience",
+    "experiencePlaceholder": "Write about your experience and skills...",
+    "hourlyRate": "Hourly Rate (MAD)",
+    "cityRegion": "City / Region",
+    "benefits": "What you'll get:",
+    "benefitsList": {
+      "work": "Work from home or on-site opportunities",
+      "orders": "Diverse orders from families and businesses",
+      "income": "Guaranteed income and work flexibility",
+      "protection": "Protection and rights guarantee",
+      "support": "Continuous technical support"
+    },
+    "submitRequest": "Submit Request",
+    "registering": "Registering...",
+    "noAccountPrompt": "Don't have an account?",
+    "registerLink": "Register Now",
+    "joinConditions": "Joining Conditions:",
+    "conditionsList": {
+      "experience": "Experience in home services",
+      "punctuality": "Commitment to agreed work schedules",
+      "professionalism": "Professional and trustworthy conduct",
+      "quality": "High quality work and cleanliness"
+    },
+    "workType": "Work Type",
+    "workTypes": {
+      "permanent": "Permanent",
+      "partTime": "Part-time",
+      "flexible": "Flexible as needed",
+      "daily": "Daily"
+    },
+    "serviceCategory": "Service Category",
+    "serviceCategories": {
+      "general": "General Services",
+      "cleaning": "Cleaning",
+      "childcare": "Childcare",
+      "eldercare": "Elderly Care",
+      "cooking": "Home Cooking",
+      "laundry": "Laundry & Ironing",
+      "comprehensive": "Comprehensive Assistance"
+    },
+    "services": {
+      "houseCleaning": "House Cleaning",
+      "laundry": "Laundry",
+      "ironing": "Ironing",
+      "organizing": "Home Organizing",
+      "childcare": "Childcare",
+      "eldercare": "Elderly Care",
+      "homeCooking": "Home Cooking",
+      "comprehensive": "Comprehensive Home Assistance"
+    },
+    "experienceYears": "Years of Experience",
+    "nationality": "Nationality",
+    "languages": "Languages",
+    "languagesList": {
+      "arabic": "Arabic",
+      "french": "French",
+      "english": "English",
+      "spanish": "Spanish"
+    },
+    "availability": "Availability",
+    "availableDays": "Available Work Days",
+    "days": {
+      "monday": "Monday",
+      "tuesday": "Tuesday",
+      "wednesday": "Wednesday",
+      "thursday": "Thursday",
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "sunday": "Sunday"
+    },
+    "workHours": "Work Hours",
+    "from": "From",
+    "to": "To",
+    "portfolio": "Portfolio",
+    "about": "About",
+    "aboutWorker": "About the Worker",
+    "workerNotFound": "Worker Not Found",
+    "workerNotFoundDesc": "We couldn't find this worker",
+    "backToWorkers": "Back to Workers",
+    "noPortfolioImages": "No portfolio images yet",
+    "availableServices": "Available Services"
+  },
+  "dashboard": {
+    "overview": "Overview",
+    "statistics": "Statistics",
+    "totalRevenue": "Total Revenue",
+    "totalOrders": "Total Orders",
+    "pendingOrders": "Pending Orders",
+    "completedOrders": "Completed Orders",
+    "successRate": "Success Rate",
+    "averageRating": "Average Rating",
+    "recentOrders": "Recent Orders",
+    "manageMenu": "Manage Menu",
+    "manageServices": "Manage Services",
+    "portfolio": "Portfolio",
+    "messages": "Messages",
+    "settings": "Settings",
+    "noOrders": "No orders",
+    "noMessages": "No messages"
+  },
+  "ratings": {
+    "title": "Ratings",
+    "rateService": "Rate the Service",
+    "rateFood": "Rate the Food",
+    "yourRating": "Your Rating",
+    "comment": "Your Comment (optional)",
+    "commentPlaceholder": "Write your comment here...",
+    "submitRating": "Submit Rating",
+    "ratingSuccess": "Rating submitted successfully",
+    "ratingError": "Error submitting rating",
+    "noRatings": "No ratings yet",
+    "averageRating": "Average Rating",
+    "totalRatings": "Total Ratings",
+    "reviews": "Reviews"
   }
 }
