@@ -511,6 +511,39 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          link: string | null
+          message: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message: string
+          title: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          link?: string | null
+          message?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           client_id: string
@@ -673,6 +706,59 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      worker_bookings: {
+        Row: {
+          booking_date: string
+          client_id: string
+          created_at: string | null
+          end_time: string
+          id: string
+          notes: string | null
+          service_type: string
+          start_time: string
+          status: string
+          total_amount: number | null
+          updated_at: string | null
+          worker_id: string
+        }
+        Insert: {
+          booking_date: string
+          client_id: string
+          created_at?: string | null
+          end_time: string
+          id?: string
+          notes?: string | null
+          service_type: string
+          start_time: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string | null
+          worker_id: string
+        }
+        Update: {
+          booking_date?: string
+          client_id?: string
+          created_at?: string | null
+          end_time?: string
+          id?: string
+          notes?: string | null
+          service_type?: string
+          start_time?: string
+          status?: string
+          total_amount?: number | null
+          updated_at?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_bookings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "house_workers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

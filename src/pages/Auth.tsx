@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -7,56 +8,90 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Lock, Mail, User, Phone, ArrowLeft } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Mail, Lock, User, Phone, Eye, EyeOff, KeyRound, ArrowLeft } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+type AuthStep = "login" | "signup" | "verify-otp" | "reset-password";
+
 const Auth = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+
+  const [step, setStep] = useState<AuthStep>("login");
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showResetPassword, setShowResetPassword] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/profile");
-      }
-    });
+    checkExistingSession();
+    
+    // Check if coming from password reset link
+    if (searchParams.get('reset') === 'true') {
+      setStep("reset-password");
+    }
+  }, [searchParams]);
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/profile");
-      }
-    });
+  const checkExistingSession = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && !searchParams.get('reset')) {
+      navigate("/profile");
+    }
+  };
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidEmail'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordMismatch'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordTooShort'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (password.length < 6) {
-        throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
-      }
-
-      if (password !== confirmPassword) {
-        throw new Error("كلمات المرور غير متطابقة");
-      }
-
-      if (!fullName.trim()) {
-        throw new Error("يرجى إدخال الاسم الكامل");
-      }
-
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -64,48 +99,42 @@ const Auth = () => {
             full_name: fullName,
             phone: phone,
           },
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: window.location.origin,
         },
       });
 
-      if (authError) throw authError;
+      if (error) throw error;
 
-      if (authData.user) {
+      if (data.user) {
         // إنشاء الملف الشخصي
-        const { error: profileError } = await supabase.from("profiles").insert([
-          {
-            id: authData.user.id,
-            full_name: fullName,
-            phone: phone,
-          },
-        ]);
-
-        if (profileError) throw profileError;
+        await supabase.from("profiles").upsert({
+          id: data.user.id,
+          full_name: fullName,
+          phone: phone,
+        });
 
         // إضافة دور العميل
-        const { error: roleError } = await supabase.from("user_roles").insert([
-          {
-            user_id: authData.user.id,
-            role: "client",
-          },
-        ]);
-
-        if (roleError) throw roleError;
-
-        toast({
-          title: "تم إنشاء الحساب بنجاح",
-          description: "تم إرسال رابط التأكيد إلى بريدك الإلكتروني. يرجى التحقق من بريدك لتفعيل حسابك.",
-          duration: 10000,
+        await supabase.from("user_roles").insert({
+          user_id: data.user.id,
+          role: "client",
         });
       }
+
+      toast({
+        title: t('common.success'),
+        description: t('auth.verificationSent'),
+      });
+
+      // انتقال لصفحة التحقق من OTP
+      setStep("verify-otp");
     } catch (error: any) {
-      console.error("Error signing up:", error);
+      console.error("Signup error:", error);
       let errorMessage = error.message;
       if (error.message.includes("already registered")) {
-        errorMessage = "هذا البريد الإلكتروني مسجل مسبقاً";
+        errorMessage = t('auth.emailExists');
       }
       toast({
-        title: "خطأ في التسجيل",
+        title: t('common.error'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -116,6 +145,16 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateEmail(email)) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidEmail'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -128,22 +167,19 @@ const Auth = () => {
 
       if (data.session) {
         toast({
-          title: "تم تسجيل الدخول بنجاح",
-          description: "مرحباً بعودتك!",
+          title: t('common.success'),
+          description: t('auth.loginSuccess'),
         });
-
         navigate("/profile");
       }
     } catch (error: any) {
-      console.error("Error signing in:", error);
-      let errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-      if (error.message.includes("Invalid login credentials")) {
-        errorMessage = "البريد الإلكتروني أو كلمة المرور غير صحيحة";
-      } else if (error.message.includes("Email not confirmed")) {
-        errorMessage = "يرجى تأكيد بريدك الإلكتروني أولاً";
+      console.error("Sign in error:", error);
+      let errorMessage = t('auth.invalidCredentials');
+      if (error.message.includes("Email not confirmed")) {
+        errorMessage = t('auth.emailNotConfirmed');
       }
       toast({
-        title: "خطأ في تسجيل الدخول",
+        title: t('common.error'),
         description: errorMessage,
         variant: "destructive",
       });
@@ -152,33 +188,38 @@ const Auth = () => {
     }
   };
 
-  const handleResetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerifyOtp = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidOtp'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (!resetEmail.trim()) {
-        throw new Error("يرجى إدخال البريد الإلكتروني");
-      }
-
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+      const { error } = await supabase.auth.verifyOtp({
+        email,
+        token: otp,
+        type: "email",
       });
 
       if (error) throw error;
 
       toast({
-        title: "تم الإرسال",
-        description: "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني",
+        title: t('common.success'),
+        description: t('auth.verificationSuccess'),
       });
 
-      setShowResetPassword(false);
-      setResetEmail("");
+      navigate("/profile");
     } catch (error: any) {
-      console.error("Error resetting password:", error);
+      console.error("OTP verification error:", error);
       toast({
-        title: "خطأ",
-        description: error.message || "حدث خطأ أثناء إرسال رابط إعادة التعيين",
+        title: t('common.error'),
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -186,145 +227,343 @@ const Auth = () => {
     }
   };
 
-  if (showResetPassword) {
-    return (
-      <div className="min-h-screen bg-gradient-subtle">
-        <Navbar />
+  const handleForgotPassword = async () => {
+    if (!validateEmail(resetEmail)) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidEmail'),
+        variant: "destructive",
+      });
+      return;
+    }
 
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth?reset=true`,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: t('common.success'),
+        description: t('auth.resetEmailSent'),
+      });
+
+      setResetDialogOpen(false);
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordMismatch'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordTooShort'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: t('common.success'),
+        description: t('auth.passwordUpdated'),
+      });
+
+      navigate("/profile");
+    } catch (error: any) {
+      console.error("Update password error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: t('common.success'),
+        description: t('auth.otpResent'),
+      });
+    } catch (error: any) {
+      console.error("Resend OTP error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Reset Password Step
+  if (step === "reset-password") {
+    return (
+      <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar />
         <div className="container mx-auto px-4 pt-24 pb-12">
           <div className="max-w-md mx-auto">
-            <div className="text-center mb-8 animate-fade-in">
-              <h1 className="text-4xl font-bold mb-2">استرجاع كلمة المرور</h1>
-              <p className="text-muted-foreground text-lg">أدخل بريدك الإلكتروني لإرسال رابط إعادة التعيين</p>
-            </div>
-
             <Card className="animate-scale-in shadow-2xl">
-              <CardHeader>
-                <Button
-                  variant="ghost"
-                  className="w-fit mb-2"
-                  onClick={() => setShowResetPassword(false)}
-                >
-                  <ArrowLeft className="h-4 w-4 ml-2" />
-                  العودة
-                </Button>
-                <CardTitle className="text-center text-2xl">إعادة تعيين كلمة المرور</CardTitle>
-                <CardDescription className="text-center">
-                  سنرسل لك رابطاً لإعادة تعيين كلمة المرور
-                </CardDescription>
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">{t('auth.resetPassword')}</CardTitle>
+                <CardDescription>{t('auth.enterNewPassword')}</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleResetPassword} className="space-y-4">
+                <form onSubmit={handleUpdatePassword} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email">البريد الإلكتروني</Label>
+                    <Label htmlFor="newPassword">{t('auth.newPassword')}</Label>
                     <div className="relative">
-                      <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                      <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                       <Input
-                        id="reset-email"
-                        type="email"
-                        placeholder="example@email.com"
-                        value={resetEmail}
-                        onChange={(e) => setResetEmail(e.target.value)}
-                        className="pr-10"
+                        id="newPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
                         required
+                        minLength={6}
                       />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 w-8`}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
                     </div>
                   </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full bg-gradient-primary hover:opacity-90"
-                    size="lg"
-                    disabled={loading}
-                  >
-                    {loading ? "جاري الإرسال..." : "إرسال رابط الاسترجاع"}
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmNewPassword">{t('auth.confirmPassword')}</Label>
+                    <div className="relative">
+                      <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
+                      <Input
+                        id="confirmNewPassword"
+                        type="password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        className={isRTL ? 'pr-10' : 'pl-10'}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    {newPassword && confirmNewPassword && newPassword !== confirmNewPassword && (
+                      <p className="text-sm text-destructive">{t('auth.passwordMismatch')}</p>
+                    )}
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? t('common.loading') : t('auth.updatePassword')}
                   </Button>
                 </form>
               </CardContent>
             </Card>
           </div>
         </div>
-
         <Footer />
       </div>
     );
   }
 
+  // Verify OTP Step
+  if (step === "verify-otp") {
+    return (
+      <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12">
+          <div className="max-w-md mx-auto">
+            <Card className="animate-scale-in shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">{t('auth.verifyEmail')}</CardTitle>
+                <CardDescription>
+                  {t('auth.otpDescription')} <strong>{email}</strong>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex justify-center" dir="ltr">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    className="gap-2"
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={handleVerifyOtp}
+                  disabled={loading || otp.length !== 6}
+                >
+                  {loading ? t('common.loading') : t('auth.verify')}
+                </Button>
+
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {t('auth.didntReceive')}
+                  </p>
+                  <Button variant="link" onClick={handleResendOtp} disabled={loading}>
+                    {t('auth.resendOtp')}
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => setStep("login")}
+                >
+                  <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('common.back')}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Main Login/Signup Form
   return (
-    <div className="min-h-screen bg-gradient-subtle">
+    <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
       <Navbar />
 
       <div className="container mx-auto px-4 pt-24 pb-12">
         <div className="max-w-md mx-auto">
           <div className="text-center mb-8 animate-fade-in">
-            <h1 className="text-4xl font-bold mb-2">مرحباً بك</h1>
-            <p className="text-muted-foreground text-lg">سجل دخولك أو أنشئ حساباً جديداً</p>
+            <h1 className="text-4xl font-bold mb-2">{t('auth.welcome')}</h1>
+            <p className="text-muted-foreground text-lg">{t('auth.welcomeSubtitle')}</p>
           </div>
 
           <Card className="animate-scale-in shadow-2xl">
-            <CardHeader>
-              <CardTitle className="text-center text-2xl">تسجيل الدخول / حساب جديد</CardTitle>
-              <CardDescription className="text-center">
-                املأ البيانات للمتابعة
-              </CardDescription>
+            <CardHeader className="text-center">
+              <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                <User className="h-8 w-8 text-white" />
+              </div>
+              <CardTitle className="text-2xl">
+                {step === "login" ? t('auth.signIn') : t('auth.signUp')}
+              </CardTitle>
             </CardHeader>
             <CardContent>
-              <Tabs defaultValue="signin" className="w-full">
+              <Tabs value={step} onValueChange={(v) => setStep(v as AuthStep)} className="w-full">
                 <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="signin">تسجيل دخول</TabsTrigger>
-                  <TabsTrigger value="signup">حساب جديد</TabsTrigger>
+                  <TabsTrigger value="login">{t('auth.signIn')}</TabsTrigger>
+                  <TabsTrigger value="signup">{t('auth.signUp')}</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="signin">
+                <TabsContent value="login">
                   <form onSubmit={handleSignIn} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signin-email">البريد الإلكتروني</Label>
+                      <Label htmlFor="email">{t('auth.email')}</Label>
                       <div className="relative">
-                        <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signin-email"
+                          id="email"
                           type="email"
                           placeholder="example@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pr-10"
+                          className={isRTL ? 'pr-10' : 'pl-10'}
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signin-password">كلمة المرور</Label>
+                      <Label htmlFor="password">{t('auth.password')}</Label>
                       <div className="relative">
-                        <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signin-password"
-                          type="password"
-                          placeholder="••••••••"
+                          id="password"
+                          type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pr-10"
+                          className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
                           required
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 w-8`}
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
                       </div>
                     </div>
 
                     <Button
                       type="button"
                       variant="link"
-                      className="p-0 h-auto text-sm text-primary"
-                      onClick={() => setShowResetPassword(true)}
+                      className="p-0 h-auto text-sm"
+                      onClick={() => setResetDialogOpen(true)}
                     >
-                      نسيت كلمة المرور؟
+                      {t('auth.forgotPassword')}
                     </Button>
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-gradient-primary hover:opacity-90"
-                      size="lg"
-                      disabled={loading}
-                    >
-                      {loading ? "جاري تسجيل الدخول..." : "تسجيل الدخول"}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t('common.loading') : t('auth.signIn')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -332,97 +571,97 @@ const Auth = () => {
                 <TabsContent value="signup">
                   <form onSubmit={handleSignUp} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="signup-name">الاسم الكامل</Label>
+                      <Label htmlFor="fullName">{t('auth.fullName')}</Label>
                       <div className="relative">
-                        <User className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <User className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signup-name"
+                          id="fullName"
                           type="text"
-                          placeholder="أحمد محمد"
                           value={fullName}
                           onChange={(e) => setFullName(e.target.value)}
-                          className="pr-10"
+                          className={isRTL ? 'pr-10' : 'pl-10'}
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-email">البريد الإلكتروني</Label>
+                      <Label htmlFor="signupEmail">{t('auth.email')}</Label>
                       <div className="relative">
-                        <Mail className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signup-email"
+                          id="signupEmail"
                           type="email"
                           placeholder="example@email.com"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="pr-10"
+                          className={isRTL ? 'pr-10' : 'pl-10'}
                           required
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-phone">رقم الهاتف</Label>
+                      <Label htmlFor="phone">{t('auth.phone')}</Label>
                       <div className="relative">
-                        <Phone className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signup-phone"
+                          id="phone"
                           type="tel"
-                          placeholder="0600000000"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="pr-10"
-                          required
+                          className={isRTL ? 'pr-10' : 'pl-10'}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-password">كلمة المرور</Label>
+                      <Label htmlFor="signupPassword">{t('auth.password')}</Label>
                       <div className="relative">
-                        <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signup-password"
-                          type="password"
-                          placeholder="••••••••"
+                          id="signupPassword"
+                          type={showPassword ? "text" : "password"}
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
-                          className="pr-10"
-                          minLength={6}
+                          className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
                           required
+                          minLength={6}
                         />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 w-8`}
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        يجب أن تكون كلمة المرور 6 أحرف على الأقل
-                      </p>
+                      <p className="text-xs text-muted-foreground">{t('auth.passwordMinLength')}</p>
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="signup-confirm-password">تأكيد كلمة المرور</Label>
+                      <Label htmlFor="confirmPassword">{t('auth.confirmPassword')}</Label>
                       <div className="relative">
-                        <Lock className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                        <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
                         <Input
-                          id="signup-confirm-password"
+                          id="confirmPassword"
                           type="password"
-                          placeholder="••••••••"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="pr-10"
-                          minLength={6}
+                          className={isRTL ? 'pr-10' : 'pl-10'}
                           required
+                          minLength={6}
                         />
                       </div>
+                      {password && confirmPassword && password !== confirmPassword && (
+                        <p className="text-sm text-destructive">{t('auth.passwordMismatch')}</p>
+                      )}
                     </div>
 
-                    <Button
-                      type="submit"
-                      className="w-full bg-gradient-primary hover:opacity-90"
-                      size="lg"
-                      disabled={loading}
-                    >
-                      {loading ? "جاري إنشاء الحساب..." : "إنشاء حساب"}
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? t('common.loading') : t('auth.signUp')}
                     </Button>
                   </form>
                 </TabsContent>
@@ -431,6 +670,38 @@ const Auth = () => {
           </Card>
         </div>
       </div>
+
+      {/* حوار استعادة كلمة المرور */}
+      <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <DialogContent dir={isRTL ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle>{t('auth.forgotPassword')}</DialogTitle>
+            <DialogDescription>
+              {t('auth.resetDescription')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="resetEmail">{t('auth.email')}</Label>
+              <Input
+                id="resetEmail"
+                type="email"
+                placeholder="example@email.com"
+                value={resetEmail}
+                onChange={(e) => setResetEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleForgotPassword} disabled={loading}>
+              {loading ? t('common.loading') : t('auth.sendResetLink')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
