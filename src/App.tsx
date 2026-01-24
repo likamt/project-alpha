@@ -18,6 +18,7 @@ import HomeCookProfile from "./pages/HomeCookProfile";
 import HomeCookDashboard from "./pages/HomeCookDashboard";
 import OrderSuccess from "./pages/OrderSuccess";
 import MyOrders from "./pages/MyOrders";
+import MyBookings from "./pages/MyBookings";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/cook-dashboard" element={<HomeCookDashboard />} />
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/my-orders" element={<MyOrders />} />
+          <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

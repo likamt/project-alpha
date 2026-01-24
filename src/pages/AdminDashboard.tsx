@@ -238,21 +238,23 @@ const AdminDashboard = () => {
         <div className="container mx-auto px-4">
           {/* Header */}
           <div className="mb-8 animate-fade-in">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
-                <BarChart3 className="h-6 w-6 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">لوحة تحكم المدير</h1>
-                <p className="text-muted-foreground">
-                  مرحباً {userProfile?.full_name}، إليك نظرة عامة على نشاط المنصة
-                </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-lg">
+                  <BarChart3 className="h-6 w-6 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">لوحة تحكم المدير</h1>
+                  <p className="text-sm md:text-base text-muted-foreground">
+                    مرحباً {userProfile?.full_name}، إليك نظرة عامة على نشاط المنصة
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-8">
             <StatsCard
               title="إجمالي المستخدمين"
               value={stats.totalUsers}
@@ -287,7 +289,7 @@ const AdminDashboard = () => {
           </div>
 
           {/* Orders Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-8">
             <Card className="animate-fade-in">
               <CardContent className="p-6">
                 <div className="flex items-center gap-4">
@@ -337,18 +339,21 @@ const AdminDashboard = () => {
 
           {/* Tabs */}
           <Tabs defaultValue="food-orders" className="animate-fade-in">
-            <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-6">
-              <TabsTrigger value="food-orders" className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                طلبات الطعام
+            <TabsList className="grid w-full max-w-2xl grid-cols-3 mb-6 h-auto">
+              <TabsTrigger value="food-orders" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm py-2">
+                <ShoppingCart className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">طلبات الطعام</span>
+                <span className="sm:hidden">طلبات</span>
               </TabsTrigger>
-              <TabsTrigger value="home-cooks" className="flex items-center gap-2">
-                <ChefHat className="h-4 w-4" />
-                الطاهيات
+              <TabsTrigger value="home-cooks" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm py-2">
+                <ChefHat className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">الطاهيات</span>
+                <span className="sm:hidden">طاهيات</span>
               </TabsTrigger>
-              <TabsTrigger value="house-workers" className="flex items-center gap-2">
-                <Home className="h-4 w-4" />
-                العاملات
+              <TabsTrigger value="house-workers" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm py-2">
+                <Home className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">العاملات</span>
+                <span className="sm:hidden">عاملات</span>
               </TabsTrigger>
             </TabsList>
 

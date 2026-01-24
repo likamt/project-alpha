@@ -297,27 +297,36 @@
     "totalRatings": "إجمالي التقييمات",
     "reviews": "المراجعات"
   },
-  "booking": {
-    "title": "حجز موعد",
-    "selectDate": "اختر التاريخ",
-    "selectTime": "اختر الوقت",
-    "duration": "مدة الخدمة",
-    "selectEndTime": "اختر وقت الانتهاء",
-    "hours": "ساعات",
-    "notes": "ملاحظات",
-    "notesPlaceholder": "أضف أي ملاحظات للعاملة...",
-    "date": "التاريخ",
-    "time": "الوقت",
-    "confirm": "تأكيد الحجز",
-    "confirmTitle": "تأكيد الحجز",
-    "confirmMessage": "هل تريد تأكيد هذا الحجز؟"
+  "subscription": {
+    "title": "الاشتراك",
+    "status": "حالة الاشتراك",
+    "active": "مشترك",
+    "trial": "فترة تجريبية",
+    "expired": "منتهي",
+    "daysLeft": "يوم متبقي",
+    "monthlyPrice": "99 د.م/شهر",
+    "firstMonthFree": "الشهر الأول مجاني!",
+    "subscribe": "اشتركي الآن",
+    "renew": "تجديد الاشتراك",
+    "manage": "إدارة الاشتراك",
+    "benefits": {
+      "visibility": "ظهور في نتائج البحث",
+      "orders": "استقبال طلبات العملاء",
+      "communication": "التواصل المباشر مع العملاء",
+      "freeTrial": "شهر أول مجاناً!"
+    },
+    "expiredMessage": "لتستمري في الظهور للعملاء وتلقي الطلبات، يرجى تجديد الاشتراك."
   },
-  "notifications": {
-    "title": "الإشعارات",
-    "markAllRead": "تحديد الكل كمقروء",
-    "empty": "لا توجد إشعارات",
-    "newBooking": "حجز جديد",
-    "newMessage": "رسالة جديدة",
-    "orderUpdate": "تحديث الطلب"
+  "myBookings": {
+    "title": "حجوزاتي",
+    "subtitle": "إدارة ومتابعة حجوزاتك مع العاملات المنزليات",
+    "upcoming": "قادمة",
+    "completed": "مكتملة",
+    "cancelled": "ملغية",
+    "noBookings": "لا توجد حجوزات",
+    "browseWorkers": "استعرض العاملات",
+    "cancelBooking": "إلغاء الحجز",
+    "confirmCancel": "هل أنت متأكد من إلغاء هذا الحجز؟",
+    "bookingCancelled": "تم إلغاء الحجز بنجاح"
   }
 }

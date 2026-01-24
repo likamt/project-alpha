@@ -16,11 +16,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { 
   ChefHat, Plus, Edit, Trash2, Star, Clock, Users, 
   ShoppingCart, MessageSquare, Loader2, DollarSign, 
-  CheckCircle, Package, AlertCircle, ImageIcon
+  CheckCircle, Package, AlertCircle, ImageIcon, Crown
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortfolioUploader from "@/components/PortfolioUploader";
 import MultiDishImageUploader from "@/components/MultiDishImageUploader";
+import SubscriptionCard from "@/components/SubscriptionCard";
 import { useTranslation } from "react-i18next";
 
 interface FoodDish {
@@ -645,8 +646,12 @@ const HomeCookDashboard = () => {
           </div>
 
           {/* Main Content */}
-          <Tabs defaultValue="orders" className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl grid-cols-4">
+          <Tabs defaultValue="subscription" className="space-y-6">
+            <TabsList className="grid w-full max-w-2xl grid-cols-5">
+              <TabsTrigger value="subscription" className="flex items-center gap-1">
+                <Crown className="h-4 w-4" />
+                الاشتراك
+              </TabsTrigger>
               <TabsTrigger value="orders">
                 الطلبات
                 {activeOrders.length > 0 && (
@@ -656,15 +661,21 @@ const HomeCookDashboard = () => {
               <TabsTrigger value="dishes">الأطباق</TabsTrigger>
               <TabsTrigger value="portfolio">
                 <ImageIcon className="h-4 w-4 ml-1" />
-                معرض الأعمال
+                معرض
               </TabsTrigger>
               <TabsTrigger value="messages">
-                الرسائل
+                رسائل
                 {stats.unreadMessages > 0 && (
                   <Badge className="mr-2 bg-red-500">{stats.unreadMessages}</Badge>
                 )}
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="subscription">
+              <div className="max-w-xl">
+                <SubscriptionCard providerType="home_cook" />
+              </div>
+            </TabsContent>
 
             <TabsContent value="orders">
               {orders.length === 0 ? (
