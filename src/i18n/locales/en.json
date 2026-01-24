@@ -1,0 +1,130 @@
+{
+  "common": {
+    "home": "Home",
+    "services": "Services",
+    "howItWorks": "How it works",
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "profile": "Profile",
+    "messages": "Messages",
+    "orders": "My Orders",
+    "dashboard": "Dashboard",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "submit": "Submit",
+    "currency": "MAD",
+    "language": "Language"
+  },
+  "nav": {
+    "homeCooking": "Home Cooking",
+    "houseWorkers": "House Workers",
+    "craftsmen": "Craftsmen",
+    "joinAs": "Join as"
+  },
+  "hero": {
+    "title": "Quick Service",
+    "subtitle": "Complete Home Services Platform",
+    "description": "Order home cooking, cleaning, and craftsman services easily",
+    "cta": "Explore Services"
+  },
+  "services": {
+    "homeCooking": {
+      "title": "Home Cooking",
+      "description": "Delicious homemade dishes from professional cooks"
+    },
+    "houseWorkers": {
+      "title": "House Workers",
+      "description": "Cleaning and home care services"
+    },
+    "craftsmen": {
+      "title": "Craftsmen",
+      "description": "Maintenance and repair services"
+    }
+  },
+  "dishes": {
+    "addDish": "Add New Dish",
+    "editDish": "Edit Dish",
+    "dishName": "Dish Name",
+    "description": "Description",
+    "category": "Category",
+    "price": "Price",
+    "prepTime": "Prep Time",
+    "servings": "Servings",
+    "tags": "Tags",
+    "images": "Dish Images",
+    "available": "Available",
+    "unavailable": "Unavailable",
+    "orderNow": "Order Now",
+    "addToCart": "Add to Cart",
+    "minutes": "minutes",
+    "uploadImages": "Upload Images",
+    "maxImages": "Maximum {{count}} images",
+    "categories": {
+      "main": "Main Dishes",
+      "appetizer": "Appetizers",
+      "dessert": "Desserts",
+      "breakfast": "Breakfast",
+      "soup": "Soups",
+      "salad": "Salads",
+      "pastry": "Pastries"
+    }
+  },
+  "orders": {
+    "myOrders": "My Orders",
+    "orderDetails": "Order Details",
+    "orderStatus": "Order Status",
+    "pending": "Pending Payment",
+    "paid": "Paid",
+    "preparing": "Preparing",
+    "ready": "Ready",
+    "delivered": "Delivered",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "deliveryAddress": "Delivery Address",
+    "totalAmount": "Total Amount",
+    "quantity": "Quantity"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "fullName": "Full Name",
+    "phone": "Phone",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "upload": {
+    "uploading": "Uploading...",
+    "uploadSuccess": "Image uploaded successfully",
+    "uploadError": "Upload error",
+    "compressing": "Compressing...",
+    "selectImage": "Select Image",
+    "dragDrop": "Drag and drop here",
+    "maxSize": "Maximum {{size}} MB",
+    "invalidType": "Invalid file type"
+  },
+  "footer": {
+    "aboutUs": "About Us",
+    "contactUs": "Contact Us",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "allRightsReserved": "All rights reserved"
+  }
+}

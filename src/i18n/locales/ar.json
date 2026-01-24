@@ -1,0 +1,130 @@
+{
+  "common": {
+    "home": "الرئيسية",
+    "services": "الخدمات",
+    "howItWorks": "كيف يعمل",
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "profile": "الملف الشخصي",
+    "messages": "الرسائل",
+    "orders": "طلباتي",
+    "dashboard": "لوحة التحكم",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "add": "إضافة",
+    "search": "بحث",
+    "filter": "تصفية",
+    "loading": "جاري التحميل...",
+    "error": "خطأ",
+    "success": "تم بنجاح",
+    "confirm": "تأكيد",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "close": "إغلاق",
+    "submit": "إرسال",
+    "currency": "د.م",
+    "language": "اللغة"
+  },
+  "nav": {
+    "homeCooking": "الطبخ المنزلي",
+    "houseWorkers": "عاملات المنزل",
+    "craftsmen": "الحرفيون",
+    "joinAs": "انضم كـ"
+  },
+  "hero": {
+    "title": "خدمة سريعة",
+    "subtitle": "منصة متكاملة للخدمات المنزلية",
+    "description": "اطلب خدمات الطبخ المنزلي، عمال المنازل، والحرفيين بكل سهولة",
+    "cta": "استكشف الخدمات"
+  },
+  "services": {
+    "homeCooking": {
+      "title": "الطبخ المنزلي",
+      "description": "أطباق منزلية لذيذة من طاهيات محترفات"
+    },
+    "houseWorkers": {
+      "title": "عاملات المنزل",
+      "description": "خدمات تنظيف واعتناء بالمنزل"
+    },
+    "craftsmen": {
+      "title": "الحرفيون",
+      "description": "خدمات صيانة وإصلاح متنوعة"
+    }
+  },
+  "dishes": {
+    "addDish": "إضافة طبق جديد",
+    "editDish": "تعديل الطبق",
+    "dishName": "اسم الطبق",
+    "description": "الوصف",
+    "category": "الفئة",
+    "price": "السعر",
+    "prepTime": "وقت التحضير",
+    "servings": "عدد الأشخاص",
+    "tags": "التصنيفات",
+    "images": "صور الطبق",
+    "available": "متاح للطلب",
+    "unavailable": "غير متاح",
+    "orderNow": "اطلب الآن",
+    "addToCart": "أضف للسلة",
+    "minutes": "دقيقة",
+    "uploadImages": "رفع الصور",
+    "maxImages": "الحد الأقصى {{count}} صور",
+    "categories": {
+      "main": "أطباق رئيسية",
+      "appetizer": "مقبلات",
+      "dessert": "حلويات",
+      "breakfast": "فطور",
+      "soup": "شوربات",
+      "salad": "سلطات",
+      "pastry": "معجنات"
+    }
+  },
+  "orders": {
+    "myOrders": "طلباتي",
+    "orderDetails": "تفاصيل الطلب",
+    "orderStatus": "حالة الطلب",
+    "pending": "في انتظار الدفع",
+    "paid": "تم الدفع",
+    "preparing": "جاري التحضير",
+    "ready": "جاهز للتسليم",
+    "delivered": "تم التوصيل",
+    "completed": "مكتمل",
+    "cancelled": "ملغي",
+    "deliveryAddress": "عنوان التوصيل",
+    "totalAmount": "المبلغ الإجمالي",
+    "quantity": "الكمية"
+  },
+  "auth": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "fullName": "الاسم الكامل",
+    "phone": "رقم الهاتف",
+    "signIn": "تسجيل الدخول",
+    "signUp": "إنشاء حساب",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟"
+  },
+  "upload": {
+    "uploading": "جاري الرفع...",
+    "uploadSuccess": "تم رفع الصورة بنجاح",
+    "uploadError": "خطأ في رفع الصورة",
+    "compressing": "جاري ضغط الصورة...",
+    "selectImage": "اختر صورة",
+    "dragDrop": "اسحب وأفلت الصور هنا",
+    "maxSize": "الحد الأقصى {{size}} ميجابايت",
+    "invalidType": "نوع الملف غير مدعوم"
+  },
+  "footer": {
+    "aboutUs": "من نحن",
+    "contactUs": "تواصل معنا",
+    "termsOfService": "شروط الخدمة",
+    "privacyPolicy": "سياسة الخصوصية",
+    "allRightsReserved": "جميع الحقوق محفوظة"
+  }
+}
