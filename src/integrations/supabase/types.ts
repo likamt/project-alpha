@@ -573,6 +573,10 @@ export type Database = {
           created_at: string | null
           id: string
           is_read: boolean | null
+          media_duration: number | null
+          media_size: number | null
+          media_url: string | null
+          message_type: string | null
           order_id: string | null
           recipient_id: string
           sender_id: string
@@ -582,6 +586,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_read?: boolean | null
+          media_duration?: number | null
+          media_size?: number | null
+          media_url?: string | null
+          message_type?: string | null
           order_id?: string | null
           recipient_id: string
           sender_id: string
@@ -591,6 +599,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           is_read?: boolean | null
+          media_duration?: number | null
+          media_size?: number | null
+          media_url?: string | null
+          message_type?: string | null
           order_id?: string | null
           recipient_id?: string
           sender_id?: string
@@ -621,31 +633,40 @@ export type Database = {
       }
       notifications: {
         Row: {
+          action_url: string | null
           created_at: string | null
           id: string
           is_read: boolean | null
           link: string | null
           message: string
+          metadata: Json | null
+          priority: string | null
           title: string
           type: string
           user_id: string
         }
         Insert: {
+          action_url?: string | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
           link?: string | null
           message: string
+          metadata?: Json | null
+          priority?: string | null
           title: string
           type?: string
           user_id: string
         }
         Update: {
+          action_url?: string | null
           created_at?: string | null
           id?: string
           is_read?: boolean | null
           link?: string | null
           message?: string
+          metadata?: Json | null
+          priority?: string | null
           title?: string
           type?: string
           user_id?: string
@@ -821,6 +842,30 @@ export type Database = {
           translation_key?: string
           translation_value?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      typing_indicators: {
+        Row: {
+          conversation_partner_id: string
+          id: string
+          is_typing: boolean | null
+          last_typed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_partner_id: string
+          id?: string
+          is_typing?: boolean | null
+          last_typed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_partner_id?: string
+          id?: string
+          is_typing?: boolean | null
+          last_typed_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
