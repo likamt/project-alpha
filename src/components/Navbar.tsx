@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { 
   Menu, X, User, LogOut, Settings, Package, 
-  MessageSquare, Calendar, Shield, ChefHat 
+  MessageSquare, Calendar, Shield, ChefHat, Home as HomeIcon
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -16,6 +16,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
+import NotificationBell from "./NotificationBell";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -123,6 +124,7 @@ const Navbar = () => {
           {/* User Menu / Auth Buttons */}
           <div className="hidden md:flex items-center gap-4">
             <LanguageSwitcher />
+            {user && <NotificationBell />}
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
