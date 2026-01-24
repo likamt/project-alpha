@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortfolioUploader from "@/components/PortfolioUploader";
+import DishImageUploader from "@/components/DishImageUploader";
 
 interface FoodDish {
   id: string;
@@ -577,12 +578,14 @@ const HomeCookDashboard = () => {
                   </div>
                   
                   <div className="space-y-2">
-                    <Label>رابط الصورة</Label>
-                    <Input
-                      value={dishForm.image_url}
-                      onChange={(e) => setDishForm({ ...dishForm, image_url: e.target.value })}
-                      placeholder="https://..."
-                    />
+                    <Label>صورة الطبق</Label>
+                    {cookProfile && (
+                      <DishImageUploader
+                        imageUrl={dishForm.image_url}
+                        onImageChange={(url) => setDishForm({ ...dishForm, image_url: url })}
+                        cookId={cookProfile.id}
+                      />
+                    )}
                   </div>
                   
                   <div className="flex items-center justify-between">
