@@ -14,6 +14,7 @@ import {
   ChevronRight,
   ChevronLeft,
   PieChart,
+  CreditCard,
 } from "lucide-react";
 
 interface SidebarItem {
@@ -30,6 +31,7 @@ interface AdminSidebarProps {
 const sidebarItems: SidebarItem[] = [
   { id: "overview", label: "نظرة عامة", icon: BarChart3 },
   { id: "analytics", label: "التقارير والإحصائيات", icon: PieChart },
+  { id: "subscriptions", label: "الاشتراكات", icon: CreditCard },
   { id: "users", label: "المستخدمين", icon: Users },
   { id: "cooks", label: "الطاهيات", icon: ChefHat },
   { id: "workers", label: "العاملات", icon: Home },
