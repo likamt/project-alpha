@@ -231,6 +231,51 @@ export type Database = {
           },
         ]
       }
+      food_ratings: {
+        Row: {
+          client_id: string
+          comment: string | null
+          cook_id: string
+          created_at: string | null
+          id: string
+          order_id: string
+          rating: number
+        }
+        Insert: {
+          client_id: string
+          comment?: string | null
+          cook_id: string
+          created_at?: string | null
+          id?: string
+          order_id: string
+          rating: number
+        }
+        Update: {
+          client_id?: string
+          comment?: string | null
+          cook_id?: string
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_ratings_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_ratings_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "food_orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       home_cooks: {
         Row: {
           availability: Json | null
@@ -289,6 +334,44 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      house_worker_ratings: {
+        Row: {
+          client_id: string
+          comment: string | null
+          created_at: string | null
+          id: string
+          rating: number
+          service_type: string | null
+          worker_id: string
+        }
+        Insert: {
+          client_id: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          rating: number
+          service_type?: string | null
+          worker_id: string
+        }
+        Update: {
+          client_id?: string
+          comment?: string | null
+          created_at?: string | null
+          id?: string
+          rating?: number
+          service_type?: string | null
+          worker_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_worker_ratings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "house_workers"
             referencedColumns: ["id"]
           },
         ]
