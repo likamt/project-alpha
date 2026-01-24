@@ -378,49 +378,76 @@ export type Database = {
       }
       house_workers: {
         Row: {
+          age_range: string | null
           availability: Json | null
+          available_days: string[] | null
           completed_orders: number | null
           created_at: string | null
           description: string | null
+          experience_years: number | null
           hourly_rate: number
           id: string
           is_verified: boolean | null
+          languages: string[] | null
           location: string | null
+          nationality: string | null
           portfolio_images: string[] | null
           rating: number | null
+          service_category: string | null
           services: string[]
           updated_at: string | null
           user_id: string
+          work_hours_end: string | null
+          work_hours_start: string | null
+          work_type: string | null
         }
         Insert: {
+          age_range?: string | null
           availability?: Json | null
+          available_days?: string[] | null
           completed_orders?: number | null
           created_at?: string | null
           description?: string | null
+          experience_years?: number | null
           hourly_rate?: number
           id?: string
           is_verified?: boolean | null
+          languages?: string[] | null
           location?: string | null
+          nationality?: string | null
           portfolio_images?: string[] | null
           rating?: number | null
+          service_category?: string | null
           services?: string[]
           updated_at?: string | null
           user_id: string
+          work_hours_end?: string | null
+          work_hours_start?: string | null
+          work_type?: string | null
         }
         Update: {
+          age_range?: string | null
           availability?: Json | null
+          available_days?: string[] | null
           completed_orders?: number | null
           created_at?: string | null
           description?: string | null
+          experience_years?: number | null
           hourly_rate?: number
           id?: string
           is_verified?: boolean | null
+          languages?: string[] | null
           location?: string | null
+          nationality?: string | null
           portfolio_images?: string[] | null
           rating?: number | null
+          service_category?: string | null
           services?: string[]
           updated_at?: string | null
           user_id?: string
+          work_hours_end?: string | null
+          work_hours_start?: string | null
+          work_type?: string | null
         }
         Relationships: [
           {

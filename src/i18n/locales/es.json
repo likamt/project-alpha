@@ -27,18 +27,31 @@
     "close": "Cerrar",
     "submit": "Enviar",
     "currency": "MAD",
-    "language": "Idioma"
+    "language": "Idioma",
+    "verified": "Verificado",
+    "unverified": "No verificado",
+    "perHour": "MAD/hora",
+    "completedOrders": "pedidos completados",
+    "rating": "Valoración",
+    "viewProfile": "Ver perfil",
+    "contact": "Contactar",
+    "call": "Llamar",
+    "sendMessage": "Enviar mensaje",
+    "noResults": "Sin resultados",
+    "tryAgain": "Intentar de nuevo"
   },
   "nav": {
     "homeCooking": "Cocina casera",
     "houseWorkers": "Trabajadoras del hogar",
     "craftsmen": "Artesanos",
-    "joinAs": "Unirse como"
+    "joinAs": "Unirse como",
+    "joinAsCook": "Unirse como cocinera",
+    "joinAsWorker": "Unirse como trabajadora"
   },
   "hero": {
     "title": "Servicio Rápido",
     "subtitle": "Plataforma completa de servicios a domicilio",
-    "description": "Pide servicios de cocina, limpieza y artesanía fácilmente",
+    "description": "Pide servicios de cocina, limpieza y mantenimiento fácilmente",
     "cta": "Explorar servicios"
   },
   "services": {
@@ -96,7 +109,9 @@
     "cancelled": "Cancelado",
     "deliveryAddress": "Dirección de entrega",
     "totalAmount": "Monto total",
-    "quantity": "Cantidad"
+    "quantity": "Cantidad",
+    "newOrder": "Nuevo pedido",
+    "confirmDelivery": "Confirmar entrega"
   },
   "auth": {
     "email": "Correo electrónico",
@@ -126,5 +141,133 @@
     "termsOfService": "Términos de servicio",
     "privacyPolicy": "Política de privacidad",
     "allRightsReserved": "Todos los derechos reservados"
+  },
+  "houseWorker": {
+    "title": "Trabajadoras del hogar profesionales",
+    "subtitle": "Obtén servicios domésticos confiables de trabajadoras profesionales y verificadas",
+    "searchPlaceholder": "Buscar trabajadora por servicio o ciudad...",
+    "noWorkersFound": "No se encontraron trabajadoras",
+    "noWorkersAvailable": "No hay trabajadoras disponibles en este momento",
+    "joinCta": "Unirse como trabajadora del hogar",
+    "joinTitle": "¿Quieres unirte a nuestro equipo?",
+    "joinDescription": "Únete a nuestra plataforma y obtén diversas oportunidades de empleo con ingresos garantizados",
+    "registerNow": "Regístrate ahora",
+    "workerInfo": "Información de la trabajadora",
+    "fillForm": "Completa la siguiente información para unirte a nuestra plataforma",
+    "servicesOffered": "Servicios ofrecidos",
+    "experienceDescription": "Sobre tu experiencia",
+    "experiencePlaceholder": "Escribe sobre tu experiencia y habilidades...",
+    "hourlyRate": "Tarifa por hora (MAD)",
+    "cityRegion": "Ciudad / Región",
+    "benefits": "Lo que obtendrás:",
+    "benefitsList": {
+      "work": "Trabajo desde casa u oportunidades en sitio",
+      "orders": "Pedidos diversos de familias y empresas",
+      "income": "Ingresos garantizados y flexibilidad laboral",
+      "protection": "Protección y garantía de derechos",
+      "support": "Soporte técnico continuo"
+    },
+    "submitRequest": "Enviar solicitud",
+    "registering": "Registrando...",
+    "noAccountPrompt": "¿No tienes cuenta?",
+    "registerLink": "Regístrate ahora",
+    "joinConditions": "Condiciones de unión:",
+    "conditionsList": {
+      "experience": "Experiencia en servicios domésticos",
+      "punctuality": "Compromiso con horarios acordados",
+      "professionalism": "Conducta profesional y confiable",
+      "quality": "Trabajo de alta calidad y limpieza"
+    },
+    "workType": "Tipo de trabajo",
+    "workTypes": {
+      "permanent": "Permanente",
+      "partTime": "Tiempo parcial",
+      "flexible": "Flexible según necesidad",
+      "daily": "Diario"
+    },
+    "serviceCategory": "Categoría de servicio",
+    "serviceCategories": {
+      "general": "Servicios generales",
+      "cleaning": "Limpieza",
+      "childcare": "Cuidado de niños",
+      "eldercare": "Cuidado de mayores",
+      "cooking": "Cocina casera",
+      "laundry": "Lavandería y planchado",
+      "comprehensive": "Asistencia integral"
+    },
+    "services": {
+      "houseCleaning": "Limpieza del hogar",
+      "laundry": "Lavandería",
+      "ironing": "Planchado",
+      "organizing": "Organización del hogar",
+      "childcare": "Cuidado de niños",
+      "eldercare": "Cuidado de mayores",
+      "homeCooking": "Cocina casera",
+      "comprehensive": "Asistencia doméstica integral"
+    },
+    "experienceYears": "Años de experiencia",
+    "nationality": "Nacionalidad",
+    "languages": "Idiomas",
+    "languagesList": {
+      "arabic": "Árabe",
+      "french": "Francés",
+      "english": "Inglés",
+      "spanish": "Español"
+    },
+    "availability": "Disponibilidad",
+    "availableDays": "Días de trabajo disponibles",
+    "days": {
+      "monday": "Lunes",
+      "tuesday": "Martes",
+      "wednesday": "Miércoles",
+      "thursday": "Jueves",
+      "friday": "Viernes",
+      "saturday": "Sábado",
+      "sunday": "Domingo"
+    },
+    "workHours": "Horas de trabajo",
+    "from": "Desde",
+    "to": "Hasta",
+    "portfolio": "Portafolio",
+    "about": "Acerca de",
+    "aboutWorker": "Sobre la trabajadora",
+    "workerNotFound": "Trabajadora no encontrada",
+    "workerNotFoundDesc": "No pudimos encontrar a esta trabajadora",
+    "backToWorkers": "Volver a trabajadoras",
+    "noPortfolioImages": "Aún no hay imágenes en el portafolio",
+    "availableServices": "Servicios disponibles"
+  },
+  "dashboard": {
+    "overview": "Resumen",
+    "statistics": "Estadísticas",
+    "totalRevenue": "Ingresos totales",
+    "totalOrders": "Total de pedidos",
+    "pendingOrders": "Pedidos pendientes",
+    "completedOrders": "Pedidos completados",
+    "successRate": "Tasa de éxito",
+    "averageRating": "Valoración media",
+    "recentOrders": "Pedidos recientes",
+    "manageMenu": "Gestionar menú",
+    "manageServices": "Gestionar servicios",
+    "portfolio": "Portafolio",
+    "messages": "Mensajes",
+    "settings": "Configuración",
+    "noOrders": "Sin pedidos",
+    "noMessages": "Sin mensajes"
+  },
+  "ratings": {
+    "title": "Valoraciones",
+    "rateService": "Valorar el servicio",
+    "rateFood": "Valorar la comida",
+    "yourRating": "Tu valoración",
+    "comment": "Tu comentario (opcional)",
+    "commentPlaceholder": "Escribe tu comentario aquí...",
+    "submitRating": "Enviar valoración",
+    "ratingSuccess": "Valoración enviada con éxito",
+    "ratingError": "Error al enviar valoración",
+    "noRatings": "Aún no hay valoraciones",
+    "averageRating": "Valoración media",
+    "totalRatings": "Total de valoraciones",
+    "reviews": "Reseñas"
   }
 }

@@ -27,18 +27,31 @@
     "close": "Schließen",
     "submit": "Absenden",
     "currency": "MAD",
-    "language": "Sprache"
+    "language": "Sprache",
+    "verified": "Verifiziert",
+    "unverified": "Nicht verifiziert",
+    "perHour": "MAD/Stunde",
+    "completedOrders": "abgeschlossene Aufträge",
+    "rating": "Bewertung",
+    "viewProfile": "Profil ansehen",
+    "contact": "Kontakt",
+    "call": "Anrufen",
+    "sendMessage": "Nachricht senden",
+    "noResults": "Keine Ergebnisse",
+    "tryAgain": "Erneut versuchen"
   },
   "nav": {
     "homeCooking": "Hausmannskost",
     "houseWorkers": "Hausangestellte",
     "craftsmen": "Handwerker",
-    "joinAs": "Beitreten als"
+    "joinAs": "Beitreten als",
+    "joinAsCook": "Als Köchin beitreten",
+    "joinAsWorker": "Als Hausangestellte beitreten"
   },
   "hero": {
     "title": "Schneller Service",
     "subtitle": "Komplette Haushaltsservice-Plattform",
-    "description": "Bestellen Sie Koch-, Reinigungs- und Handwerkerservices einfach",
+    "description": "Bestellen Sie Koch-, Reinigungs- und Wartungsdienste einfach",
     "cta": "Services entdecken"
   },
   "services": {
@@ -96,7 +109,9 @@
     "cancelled": "Storniert",
     "deliveryAddress": "Lieferadresse",
     "totalAmount": "Gesamtbetrag",
-    "quantity": "Menge"
+    "quantity": "Menge",
+    "newOrder": "Neue Bestellung",
+    "confirmDelivery": "Lieferung bestätigen"
   },
   "auth": {
     "email": "E-Mail",
@@ -126,5 +141,133 @@
     "termsOfService": "Nutzungsbedingungen",
     "privacyPolicy": "Datenschutz",
     "allRightsReserved": "Alle Rechte vorbehalten"
+  },
+  "houseWorker": {
+    "title": "Professionelle Hausangestellte",
+    "subtitle": "Erhalten Sie zuverlässige Haushaltsdienste von professionellen und verifizierten Arbeiterinnen",
+    "searchPlaceholder": "Suchen Sie nach Arbeiterin nach Service oder Stadt...",
+    "noWorkersFound": "Keine Arbeiterinnen gefunden",
+    "noWorkersAvailable": "Derzeit keine Arbeiterinnen verfügbar",
+    "joinCta": "Als Hausangestellte beitreten",
+    "joinTitle": "Möchten Sie unserem Team beitreten?",
+    "joinDescription": "Treten Sie unserer Plattform bei und erhalten Sie vielfältige Beschäftigungsmöglichkeiten mit garantiertem Einkommen",
+    "registerNow": "Jetzt registrieren",
+    "workerInfo": "Informationen zur Arbeiterin",
+    "fillForm": "Füllen Sie die folgenden Informationen aus, um unserer Plattform beizutreten",
+    "servicesOffered": "Angebotene Dienste",
+    "experienceDescription": "Über Ihre Erfahrung",
+    "experiencePlaceholder": "Schreiben Sie über Ihre Erfahrung und Fähigkeiten...",
+    "hourlyRate": "Stundensatz (MAD)",
+    "cityRegion": "Stadt / Region",
+    "benefits": "Was Sie bekommen:",
+    "benefitsList": {
+      "work": "Arbeit von zu Hause oder vor Ort",
+      "orders": "Vielfältige Aufträge von Familien und Unternehmen",
+      "income": "Garantiertes Einkommen und Arbeitsflexibilität",
+      "protection": "Schutz und Rechtegarantie",
+      "support": "Kontinuierlicher technischer Support"
+    },
+    "submitRequest": "Anfrage absenden",
+    "registering": "Registrierung...",
+    "noAccountPrompt": "Kein Konto?",
+    "registerLink": "Jetzt registrieren",
+    "joinConditions": "Beitrittsbedingungen:",
+    "conditionsList": {
+      "experience": "Erfahrung im Haushaltsbereich",
+      "punctuality": "Einhaltung vereinbarter Arbeitszeiten",
+      "professionalism": "Professionelles und zuverlässiges Verhalten",
+      "quality": "Hochwertige Arbeit und Sauberkeit"
+    },
+    "workType": "Arbeitstyp",
+    "workTypes": {
+      "permanent": "Dauerhaft",
+      "partTime": "Teilzeit",
+      "flexible": "Flexibel nach Bedarf",
+      "daily": "Täglich"
+    },
+    "serviceCategory": "Servicekategorie",
+    "serviceCategories": {
+      "general": "Allgemeine Dienste",
+      "cleaning": "Reinigung",
+      "childcare": "Kinderbetreuung",
+      "eldercare": "Altenpflege",
+      "cooking": "Hausmannskost",
+      "laundry": "Wäsche und Bügeln",
+      "comprehensive": "Umfassende Unterstützung"
+    },
+    "services": {
+      "houseCleaning": "Hausreinigung",
+      "laundry": "Wäsche",
+      "ironing": "Bügeln",
+      "organizing": "Hausorganisation",
+      "childcare": "Kinderbetreuung",
+      "eldercare": "Altenpflege",
+      "homeCooking": "Hausmannskost",
+      "comprehensive": "Umfassende Haushaltsunterstützung"
+    },
+    "experienceYears": "Jahre Erfahrung",
+    "nationality": "Nationalität",
+    "languages": "Sprachen",
+    "languagesList": {
+      "arabic": "Arabisch",
+      "french": "Französisch",
+      "english": "Englisch",
+      "spanish": "Spanisch"
+    },
+    "availability": "Verfügbarkeit",
+    "availableDays": "Verfügbare Arbeitstage",
+    "days": {
+      "monday": "Montag",
+      "tuesday": "Dienstag",
+      "wednesday": "Mittwoch",
+      "thursday": "Donnerstag",
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "sunday": "Sonntag"
+    },
+    "workHours": "Arbeitszeiten",
+    "from": "Von",
+    "to": "Bis",
+    "portfolio": "Portfolio",
+    "about": "Über",
+    "aboutWorker": "Über die Arbeiterin",
+    "workerNotFound": "Arbeiterin nicht gefunden",
+    "workerNotFoundDesc": "Wir konnten diese Arbeiterin nicht finden",
+    "backToWorkers": "Zurück zu Arbeiterinnen",
+    "noPortfolioImages": "Noch keine Portfolio-Bilder",
+    "availableServices": "Verfügbare Dienste"
+  },
+  "dashboard": {
+    "overview": "Übersicht",
+    "statistics": "Statistiken",
+    "totalRevenue": "Gesamtumsatz",
+    "totalOrders": "Gesamtbestellungen",
+    "pendingOrders": "Ausstehende Bestellungen",
+    "completedOrders": "Abgeschlossene Bestellungen",
+    "successRate": "Erfolgsquote",
+    "averageRating": "Durchschnittsbewertung",
+    "recentOrders": "Aktuelle Bestellungen",
+    "manageMenu": "Menü verwalten",
+    "manageServices": "Dienste verwalten",
+    "portfolio": "Portfolio",
+    "messages": "Nachrichten",
+    "settings": "Einstellungen",
+    "noOrders": "Keine Bestellungen",
+    "noMessages": "Keine Nachrichten"
+  },
+  "ratings": {
+    "title": "Bewertungen",
+    "rateService": "Service bewerten",
+    "rateFood": "Essen bewerten",
+    "yourRating": "Ihre Bewertung",
+    "comment": "Ihr Kommentar (optional)",
+    "commentPlaceholder": "Schreiben Sie Ihren Kommentar hier...",
+    "submitRating": "Bewertung absenden",
+    "ratingSuccess": "Bewertung erfolgreich gesendet",
+    "ratingError": "Fehler beim Senden der Bewertung",
+    "noRatings": "Noch keine Bewertungen",
+    "averageRating": "Durchschnittsbewertung",
+    "totalRatings": "Gesamtbewertungen",
+    "reviews": "Rezensionen"
   }
 }
