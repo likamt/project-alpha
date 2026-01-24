@@ -1,0 +1,130 @@
+{
+  "common": {
+    "home": "Inicio",
+    "services": "Servicios",
+    "howItWorks": "Cómo funciona",
+    "login": "Iniciar sesión",
+    "register": "Registrarse",
+    "logout": "Cerrar sesión",
+    "profile": "Perfil",
+    "messages": "Mensajes",
+    "orders": "Mis pedidos",
+    "dashboard": "Panel de control",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "add": "Añadir",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "previous": "Anterior",
+    "close": "Cerrar",
+    "submit": "Enviar",
+    "currency": "MAD",
+    "language": "Idioma"
+  },
+  "nav": {
+    "homeCooking": "Cocina casera",
+    "houseWorkers": "Trabajadoras del hogar",
+    "craftsmen": "Artesanos",
+    "joinAs": "Unirse como"
+  },
+  "hero": {
+    "title": "Servicio Rápido",
+    "subtitle": "Plataforma completa de servicios a domicilio",
+    "description": "Pide servicios de cocina, limpieza y artesanía fácilmente",
+    "cta": "Explorar servicios"
+  },
+  "services": {
+    "homeCooking": {
+      "title": "Cocina casera",
+      "description": "Platos deliciosos de cocineras profesionales"
+    },
+    "houseWorkers": {
+      "title": "Trabajadoras del hogar",
+      "description": "Servicios de limpieza y cuidado del hogar"
+    },
+    "craftsmen": {
+      "title": "Artesanos",
+      "description": "Servicios de mantenimiento y reparación"
+    }
+  },
+  "dishes": {
+    "addDish": "Añadir plato",
+    "editDish": "Editar plato",
+    "dishName": "Nombre del plato",
+    "description": "Descripción",
+    "category": "Categoría",
+    "price": "Precio",
+    "prepTime": "Tiempo de preparación",
+    "servings": "Porciones",
+    "tags": "Etiquetas",
+    "images": "Imágenes del plato",
+    "available": "Disponible",
+    "unavailable": "No disponible",
+    "orderNow": "Pedir ahora",
+    "addToCart": "Añadir al carrito",
+    "minutes": "minutos",
+    "uploadImages": "Subir imágenes",
+    "maxImages": "Máximo {{count}} imágenes",
+    "categories": {
+      "main": "Platos principales",
+      "appetizer": "Entrantes",
+      "dessert": "Postres",
+      "breakfast": "Desayuno",
+      "soup": "Sopas",
+      "salad": "Ensaladas",
+      "pastry": "Repostería"
+    }
+  },
+  "orders": {
+    "myOrders": "Mis pedidos",
+    "orderDetails": "Detalles del pedido",
+    "orderStatus": "Estado",
+    "pending": "Pendiente de pago",
+    "paid": "Pagado",
+    "preparing": "Preparando",
+    "ready": "Listo",
+    "delivered": "Entregado",
+    "completed": "Completado",
+    "cancelled": "Cancelado",
+    "deliveryAddress": "Dirección de entrega",
+    "totalAmount": "Monto total",
+    "quantity": "Cantidad"
+  },
+  "auth": {
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "fullName": "Nombre completo",
+    "phone": "Teléfono",
+    "signIn": "Iniciar sesión",
+    "signUp": "Registrarse",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "noAccount": "¿No tienes cuenta?",
+    "hasAccount": "¿Ya tienes cuenta?"
+  },
+  "upload": {
+    "uploading": "Subiendo...",
+    "uploadSuccess": "Imagen subida",
+    "uploadError": "Error al subir",
+    "compressing": "Comprimiendo...",
+    "selectImage": "Seleccionar imagen",
+    "dragDrop": "Arrastra y suelta aquí",
+    "maxSize": "Máximo {{size}} MB",
+    "invalidType": "Tipo de archivo no soportado"
+  },
+  "footer": {
+    "aboutUs": "Sobre nosotros",
+    "contactUs": "Contacto",
+    "termsOfService": "Términos de servicio",
+    "privacyPolicy": "Política de privacidad",
+    "allRightsReserved": "Todos los derechos reservados"
+  }
+}

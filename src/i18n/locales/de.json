@@ -1,0 +1,130 @@
+{
+  "common": {
+    "home": "Startseite",
+    "services": "Dienstleistungen",
+    "howItWorks": "So funktioniert's",
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "logout": "Abmelden",
+    "profile": "Profil",
+    "messages": "Nachrichten",
+    "orders": "Meine Bestellungen",
+    "dashboard": "Dashboard",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "add": "Hinzufügen",
+    "search": "Suchen",
+    "filter": "Filtern",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "confirm": "Bestätigen",
+    "back": "Zurück",
+    "next": "Weiter",
+    "previous": "Zurück",
+    "close": "Schließen",
+    "submit": "Absenden",
+    "currency": "MAD",
+    "language": "Sprache"
+  },
+  "nav": {
+    "homeCooking": "Hausmannskost",
+    "houseWorkers": "Hausangestellte",
+    "craftsmen": "Handwerker",
+    "joinAs": "Beitreten als"
+  },
+  "hero": {
+    "title": "Schneller Service",
+    "subtitle": "Komplette Haushaltsservice-Plattform",
+    "description": "Bestellen Sie Koch-, Reinigungs- und Handwerkerservices einfach",
+    "cta": "Services entdecken"
+  },
+  "services": {
+    "homeCooking": {
+      "title": "Hausmannskost",
+      "description": "Leckere Gerichte von professionellen Köchinnen"
+    },
+    "houseWorkers": {
+      "title": "Hausangestellte",
+      "description": "Reinigungs- und Haushaltsdienste"
+    },
+    "craftsmen": {
+      "title": "Handwerker",
+      "description": "Wartungs- und Reparaturdienste"
+    }
+  },
+  "dishes": {
+    "addDish": "Gericht hinzufügen",
+    "editDish": "Gericht bearbeiten",
+    "dishName": "Gerichtname",
+    "description": "Beschreibung",
+    "category": "Kategorie",
+    "price": "Preis",
+    "prepTime": "Zubereitungszeit",
+    "servings": "Portionen",
+    "tags": "Tags",
+    "images": "Gerichtbilder",
+    "available": "Verfügbar",
+    "unavailable": "Nicht verfügbar",
+    "orderNow": "Jetzt bestellen",
+    "addToCart": "In den Warenkorb",
+    "minutes": "Minuten",
+    "uploadImages": "Bilder hochladen",
+    "maxImages": "Maximal {{count}} Bilder",
+    "categories": {
+      "main": "Hauptgerichte",
+      "appetizer": "Vorspeisen",
+      "dessert": "Desserts",
+      "breakfast": "Frühstück",
+      "soup": "Suppen",
+      "salad": "Salate",
+      "pastry": "Gebäck"
+    }
+  },
+  "orders": {
+    "myOrders": "Meine Bestellungen",
+    "orderDetails": "Bestelldetails",
+    "orderStatus": "Status",
+    "pending": "Zahlung ausstehend",
+    "paid": "Bezahlt",
+    "preparing": "In Vorbereitung",
+    "ready": "Bereit",
+    "delivered": "Geliefert",
+    "completed": "Abgeschlossen",
+    "cancelled": "Storniert",
+    "deliveryAddress": "Lieferadresse",
+    "totalAmount": "Gesamtbetrag",
+    "quantity": "Menge"
+  },
+  "auth": {
+    "email": "E-Mail",
+    "password": "Passwort",
+    "confirmPassword": "Passwort bestätigen",
+    "fullName": "Vollständiger Name",
+    "phone": "Telefon",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "forgotPassword": "Passwort vergessen?",
+    "noAccount": "Kein Konto?",
+    "hasAccount": "Bereits ein Konto?"
+  },
+  "upload": {
+    "uploading": "Hochladen...",
+    "uploadSuccess": "Bild hochgeladen",
+    "uploadError": "Upload-Fehler",
+    "compressing": "Komprimieren...",
+    "selectImage": "Bild auswählen",
+    "dragDrop": "Hier ablegen",
+    "maxSize": "Maximal {{size}} MB",
+    "invalidType": "Dateityp nicht unterstützt"
+  },
+  "footer": {
+    "aboutUs": "Über uns",
+    "contactUs": "Kontakt",
+    "termsOfService": "Nutzungsbedingungen",
+    "privacyPolicy": "Datenschutz",
+    "allRightsReserved": "Alle Rechte vorbehalten"
+  }
+}
