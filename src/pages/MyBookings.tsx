@@ -5,21 +5,21 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import RatingDialog from "@/components/RatingDialog";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Calendar,
   Clock,
-  MapPin,
   User,
   CheckCircle,
   XCircle,
   Loader2,
   Phone,
-  MessageSquare,
   AlertCircle,
+  Star,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ar, enUS } from "date-fns/locale";
@@ -36,6 +36,7 @@ interface Booking {
   total_amount: number | null;
   notes: string | null;
   created_at: string;
+  has_rating?: boolean;
   worker?: {
     id: string;
     hourly_rate: number;
@@ -55,6 +56,8 @@ const MyBookings = () => {
   const [loading, setLoading] = useState(true);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [activeTab, setActiveTab] = useState("upcoming");
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     fetchBookings();
@@ -82,7 +85,22 @@ const MyBookings = () => {
         .order("booking_date", { ascending: false });
 
       if (error) throw error;
-      setBookings(data || []);
+
+      // Check which bookings have ratings
+      const { data: ratings } = await supabase
+        .from("house_worker_ratings")
+        .select("booking_id")
+        .eq("client_id", user.id)
+        .not("booking_id", "is", null);
+
+      const ratedBookingIds = new Set(ratings?.map(r => r.booking_id) || []);
+      
+      const bookingsWithRatingStatus = (data || []).map(booking => ({
+        ...booking,
+        has_rating: ratedBookingIds.has(booking.id)
+      }));
+
+      setBookings(bookingsWithRatingStatus);
     } catch (error: any) {
       toast({
         title: t("common.error"),
@@ -116,6 +134,47 @@ const MyBookings = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleRateBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setRatingDialogOpen(true);
+  };
+
+  const submitRating = async (rating: number, comment: string) => {
+    if (!selectedBooking) return;
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: t("common.error"),
+        description: "يرجى تسجيل الدخول",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from("house_worker_ratings")
+      .insert({
+        worker_id: selectedBooking.worker_id,
+        client_id: user.id,
+        booking_id: selectedBooking.id,
+        rating,
+        comment: comment || null,
+        service_type: selectedBooking.service_type,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    toast({
+      title: t("common.success"),
+      description: t("ratings.ratingSuccess"),
+    });
+
+    fetchBookings();
   };
 
   const getStatusBadge = (status: string) => {
@@ -312,6 +371,22 @@ const MyBookings = () => {
                                   إلغاء
                                 </Button>
                               )}
+                              {booking.status === "completed" && !booking.has_rating && (
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleRateBooking(booking)}
+                                  className="bg-amber-500 hover:bg-amber-600"
+                                >
+                                  <Star className="h-4 w-4 ml-1" />
+                                  قيّم الخدمة
+                                </Button>
+                              )}
+                              {booking.status === "completed" && booking.has_rating && (
+                                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                                  <CheckCircle className="h-3 w-3 ml-1" />
+                                  تم التقييم
+                                </Badge>
+                              )}
                               {booking.worker?.profile?.phone && (
                                 <Button
                                   variant="outline"
@@ -356,6 +431,17 @@ const MyBookings = () => {
       </main>
 
       <Footer />
+
+      <RatingDialog
+        open={ratingDialogOpen}
+        onClose={() => {
+          setRatingDialogOpen(false);
+          setSelectedBooking(null);
+        }}
+        onSubmit={submitRating}
+        title={t("ratings.rateService")}
+        description={`${t("ratings.rateService")} - ${selectedBooking?.worker?.profile?.full_name || ""}`}
+      />
     </div>
   );
 };
