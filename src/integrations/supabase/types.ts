@@ -355,6 +355,7 @@ export type Database = {
       }
       house_worker_ratings: {
         Row: {
+          booking_id: string | null
           client_id: string
           comment: string | null
           created_at: string | null
@@ -364,6 +365,7 @@ export type Database = {
           worker_id: string
         }
         Insert: {
+          booking_id?: string | null
           client_id: string
           comment?: string | null
           created_at?: string | null
@@ -373,6 +375,7 @@ export type Database = {
           worker_id: string
         }
         Update: {
+          booking_id?: string | null
           client_id?: string
           comment?: string | null
           created_at?: string | null
@@ -382,6 +385,13 @@ export type Database = {
           worker_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "house_worker_ratings_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "worker_bookings"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "house_worker_ratings_worker_id_fkey"
             columns: ["worker_id"]
