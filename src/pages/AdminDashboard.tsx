@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminOverviewTab from "@/components/admin/AdminOverviewTab";
 import AdminAnalyticsTab from "@/components/admin/AdminAnalyticsTab";
+import AdminSubscriptionsTab from "@/components/admin/AdminSubscriptionsTab";
 import AdminUsersTab from "@/components/admin/AdminUsersTab";
 import AdminCooksTab from "@/components/admin/AdminCooksTab";
 import AdminWorkersTab from "@/components/admin/AdminWorkersTab";
@@ -117,6 +118,8 @@ const AdminDashboard = () => {
         return <AdminOverviewTab stats={stats} />;
       case "analytics":
         return <AdminAnalyticsTab />;
+      case "subscriptions":
+        return <AdminSubscriptionsTab />;
       case "users":
         return <AdminUsersTab />;
       case "cooks":
