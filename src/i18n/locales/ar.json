@@ -198,7 +198,13 @@
     "viaSms": "عبر رسالة SMS",
     "smsOtpSent": "تم إرسال الكود إلى رقم هاتفك",
     "enterPhoneNumber": "أدخل رقم الهاتف",
-    "phonePlaceholder": "+212 6XX XXX XXX"
+    "phonePlaceholder": "+212 6XX XXX XXX",
+    "loginOtpSent": "تم إرسال كود التحقق للدخول",
+    "noPhoneNumber": "لا يوجد رقم هاتف مسجل لهذا الحساب",
+    "selectLoginMethod": "اختر طريقة التحقق للدخول",
+    "loginVerification": "تأكيد تسجيل الدخول",
+    "loginVerificationDesc": "لأمانك، سنرسل لك كود تحقق للتأكد من هويتك",
+    "sendCode": "إرسال الكود"
   },
   "upload": {
     "uploading": "جاري الرفع...",
