@@ -91,6 +91,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // إنشاء الحساب مع تأكيد تلقائي
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -99,7 +100,6 @@ const Auth = () => {
             full_name: fullName,
             phone: phone,
           },
-          emailRedirectTo: window.location.origin,
         },
       });
 
@@ -118,6 +118,30 @@ const Auth = () => {
           user_id: data.user.id,
           role: "client",
         });
+
+        // إرسال OTP عبر Edge Function
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            email: email,
+            token: otpCode,
+            email_action_type: 'signup',
+            user_name: fullName,
+          },
+        });
+
+        if (emailError) {
+          console.error('Error sending OTP email:', emailError);
+        }
+
+        // حفظ OTP مؤقتاً في localStorage للتحقق
+        localStorage.setItem('pending_otp', JSON.stringify({
+          email,
+          otp: otpCode,
+          expires: Date.now() + 10 * 60 * 1000, // 10 دقائق
+          userId: data.user.id,
+        }));
       }
 
       toast({
@@ -201,10 +225,31 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.verifyOtp({
+      // التحقق من OTP المخزن محلياً
+      const pendingOtp = localStorage.getItem('pending_otp');
+      
+      if (!pendingOtp) {
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      const { email: storedEmail, otp: storedOtp, expires, userId } = JSON.parse(pendingOtp);
+
+      if (Date.now() > expires) {
+        localStorage.removeItem('pending_otp');
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      if (otp !== storedOtp || email !== storedEmail) {
+        throw new Error(t('auth.invalidOtp'));
+      }
+
+      // OTP صحيح - تسجيل الدخول تلقائياً
+      localStorage.removeItem('pending_otp');
+
+      // تسجيل الدخول بالبريد وكلمة المرور
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        token: otp,
-        type: "email",
+        password,
       });
 
       if (error) throw error;
@@ -316,12 +361,26 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resend({
-        type: 'signup',
-        email: email,
+      // إعادة إرسال OTP عبر Edge Function
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+      
+      const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+        body: {
+          email: email,
+          token: otpCode,
+          email_action_type: 'signup',
+          user_name: fullName,
+        },
       });
 
-      if (error) throw error;
+      if (emailError) throw emailError;
+
+      // تحديث OTP المخزن
+      localStorage.setItem('pending_otp', JSON.stringify({
+        email,
+        otp: otpCode,
+        expires: Date.now() + 10 * 60 * 1000,
+      }));
 
       toast({
         title: t('common.success'),
