@@ -10,11 +10,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Mail, Lock, User, Phone, Eye, EyeOff, KeyRound, ArrowLeft } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Mail, Lock, User, Phone, Eye, EyeOff, KeyRound, ArrowLeft, MessageSquare } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 type AuthStep = "login" | "signup" | "verify-otp" | "reset-password";
+type VerificationMethod = "email" | "sms";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,6 +38,7 @@ const Auth = () => {
   const [resetEmail, setResetEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("email");
 
   useEffect(() => {
     checkExistingSession();
@@ -58,6 +61,12 @@ const Auth = () => {
     return re.test(email);
   };
 
+  const validatePhone = (phone: string) => {
+    // Basic phone validation - at least 9 digits
+    const cleaned = phone.replace(/\D/g, '');
+    return cleaned.length >= 9;
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -65,6 +74,15 @@ const Auth = () => {
       toast({
         title: t('common.error'),
         description: t('auth.invalidEmail'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (verificationMethod === "sms" && !validatePhone(phone)) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidPhone'),
         variant: "destructive",
       });
       return;
@@ -119,35 +137,68 @@ const Auth = () => {
           role: "client",
         });
 
-        // إرسال OTP عبر Edge Function
+        // إرسال OTP حسب الطريقة المختارة
         const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
         
-        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
-          body: {
-            email: email,
-            token: otpCode,
-            email_action_type: 'signup',
-            user_name: fullName,
-          },
-        });
+        if (verificationMethod === "sms") {
+          // إرسال OTP عبر SMS
+          const { data: smsData, error: smsError } = await supabase.functions.invoke('send-sms-otp', {
+            body: {
+              phone: phone,
+              user_name: fullName,
+            },
+          });
 
-        if (emailError) {
-          console.error('Error sending OTP email:', emailError);
+          if (smsError) {
+            console.error('Error sending SMS OTP:', smsError);
+            throw smsError;
+          }
+
+          // حفظ OTP مؤقتاً
+          localStorage.setItem('pending_otp', JSON.stringify({
+            email,
+            phone,
+            otp: smsData.otpCode || otpCode,
+            expires: Date.now() + 10 * 60 * 1000,
+            userId: data.user.id,
+            method: 'sms',
+          }));
+
+          toast({
+            title: t('common.success'),
+            description: t('auth.smsOtpSent'),
+          });
+        } else {
+          // إرسال OTP عبر Email
+          const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+            body: {
+              email: email,
+              token: otpCode,
+              email_action_type: 'signup',
+              user_name: fullName,
+            },
+          });
+
+          if (emailError) {
+            console.error('Error sending OTP email:', emailError);
+          }
+
+          // حفظ OTP مؤقتاً
+          localStorage.setItem('pending_otp', JSON.stringify({
+            email,
+            phone,
+            otp: otpCode,
+            expires: Date.now() + 10 * 60 * 1000,
+            userId: data.user.id,
+            method: 'email',
+          }));
+
+          toast({
+            title: t('common.success'),
+            description: t('auth.verificationSent'),
+          });
         }
-
-        // حفظ OTP مؤقتاً في localStorage للتحقق
-        localStorage.setItem('pending_otp', JSON.stringify({
-          email,
-          otp: otpCode,
-          expires: Date.now() + 10 * 60 * 1000, // 10 دقائق
-          userId: data.user.id,
-        }));
       }
-
-      toast({
-        title: t('common.success'),
-        description: t('auth.verificationSent'),
-      });
 
       // انتقال لصفحة التحقق من OTP
       setStep("verify-otp");
@@ -232,14 +283,14 @@ const Auth = () => {
         throw new Error(t('auth.otpExpired'));
       }
 
-      const { email: storedEmail, otp: storedOtp, expires, userId } = JSON.parse(pendingOtp);
+      const stored = JSON.parse(pendingOtp);
 
-      if (Date.now() > expires) {
+      if (Date.now() > stored.expires) {
         localStorage.removeItem('pending_otp');
         throw new Error(t('auth.otpExpired'));
       }
 
-      if (otp !== storedOtp || email !== storedEmail) {
+      if (otp !== stored.otp) {
         throw new Error(t('auth.invalidOtp'));
       }
 
@@ -248,7 +299,7 @@ const Auth = () => {
 
       // تسجيل الدخول بالبريد وكلمة المرور
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: stored.email || email,
         password,
       });
 
@@ -361,26 +412,47 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      // إعادة إرسال OTP عبر Edge Function
+      const pendingOtp = localStorage.getItem('pending_otp');
+      const stored = pendingOtp ? JSON.parse(pendingOtp) : { method: verificationMethod };
+      
+      // إعادة إرسال OTP
       const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
       
-      const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
-        body: {
-          email: email,
-          token: otpCode,
-          email_action_type: 'signup',
-          user_name: fullName,
-        },
-      });
+      if (stored.method === 'sms' || verificationMethod === 'sms') {
+        // إرسال SMS
+        const { data: smsData, error: smsError } = await supabase.functions.invoke('send-sms-otp', {
+          body: {
+            phone: phone || stored.phone,
+            user_name: fullName,
+          },
+        });
 
-      if (emailError) throw emailError;
+        if (smsError) throw smsError;
 
-      // تحديث OTP المخزن
-      localStorage.setItem('pending_otp', JSON.stringify({
-        email,
-        otp: otpCode,
-        expires: Date.now() + 10 * 60 * 1000,
-      }));
+        localStorage.setItem('pending_otp', JSON.stringify({
+          ...stored,
+          otp: smsData.otpCode || otpCode,
+          expires: Date.now() + 10 * 60 * 1000,
+        }));
+      } else {
+        // إرسال Email
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            email: email || stored.email,
+            token: otpCode,
+            email_action_type: 'signup',
+            user_name: fullName,
+          },
+        });
+
+        if (emailError) throw emailError;
+
+        localStorage.setItem('pending_otp', JSON.stringify({
+          ...stored,
+          otp: otpCode,
+          expires: Date.now() + 10 * 60 * 1000,
+        }));
+      }
 
       toast({
         title: t('common.success'),
@@ -474,6 +546,11 @@ const Auth = () => {
 
   // Verify OTP Step
   if (step === "verify-otp") {
+    const pendingOtp = localStorage.getItem('pending_otp');
+    const stored = pendingOtp ? JSON.parse(pendingOtp) : null;
+    const displayContact = stored?.method === 'sms' ? (stored.phone || phone) : (stored?.email || email);
+    const isPhoneVerification = stored?.method === 'sms';
+
     return (
       <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
         <Navbar />
@@ -482,11 +559,17 @@ const Auth = () => {
             <Card className="animate-scale-in shadow-2xl">
               <CardHeader className="text-center">
                 <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                  <KeyRound className="h-8 w-8 text-white" />
+                  {isPhoneVerification ? (
+                    <MessageSquare className="h-8 w-8 text-white" />
+                  ) : (
+                    <KeyRound className="h-8 w-8 text-white" />
+                  )}
                 </div>
-                <CardTitle className="text-2xl">{t('auth.verifyEmail')}</CardTitle>
+                <CardTitle className="text-2xl">
+                  {isPhoneVerification ? t('auth.verifyPhone') : t('auth.verifyEmail')}
+                </CardTitle>
                 <CardDescription>
-                  {t('auth.otpDescription')} <strong>{email}</strong>
+                  {t('auth.otpDescription')} <strong dir="ltr">{displayContact}</strong>
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -667,11 +750,38 @@ const Auth = () => {
                         <Input
                           id="phone"
                           type="tel"
+                          placeholder={t('auth.phonePlaceholder')}
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           className={isRTL ? 'pr-10' : 'pl-10'}
+                          dir="ltr"
                         />
                       </div>
+                    </div>
+
+                    {/* طريقة التحقق */}
+                    <div className="space-y-3 p-4 bg-muted/50 rounded-lg">
+                      <Label className="text-base font-medium">{t('auth.verificationMethod')}</Label>
+                      <RadioGroup
+                        value={verificationMethod}
+                        onValueChange={(v) => setVerificationMethod(v as VerificationMethod)}
+                        className="flex flex-col gap-3"
+                      >
+                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                          <RadioGroupItem value="email" id="verify-email" />
+                          <Label htmlFor="verify-email" className="flex items-center gap-2 cursor-pointer">
+                            <Mail className="h-4 w-4 text-primary" />
+                            {t('auth.viaEmail')}
+                          </Label>
+                        </div>
+                        <div className="flex items-center space-x-2 rtl:space-x-reverse">
+                          <RadioGroupItem value="sms" id="verify-sms" />
+                          <Label htmlFor="verify-sms" className="flex items-center gap-2 cursor-pointer">
+                            <MessageSquare className="h-4 w-4 text-success" />
+                            {t('auth.viaSms')}
+                          </Label>
+                        </div>
+                      </RadioGroup>
                     </div>
 
                     <div className="space-y-2">
