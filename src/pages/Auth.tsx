@@ -15,8 +15,9 @@ import { Mail, Lock, User, Phone, Eye, EyeOff, KeyRound, ArrowLeft, MessageSquar
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-type AuthStep = "login" | "signup" | "verify-otp" | "reset-password";
+type AuthStep = "login" | "signup" | "verify-otp" | "reset-password" | "login-verify-otp";
 type VerificationMethod = "email" | "sms";
+type OtpContext = "signup" | "login";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -36,6 +37,9 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [loginVerificationMethod, setLoginVerificationMethod] = useState<VerificationMethod>("email");
+  const [showLoginOtpSelection, setShowLoginOtpSelection] = useState(false);
+  const [otpContext, setOtpContext] = useState<OtpContext>("signup");
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [verificationMethod, setVerificationMethod] = useState<VerificationMethod>("email");
@@ -233,6 +237,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // التحقق من صحة البيانات أولاً
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -240,12 +245,29 @@ const Auth = () => {
 
       if (error) throw error;
 
-      if (data.session) {
-        toast({
-          title: t('common.success'),
-          description: t('auth.loginSuccess'),
-        });
-        navigate("/profile");
+      if (data.session && data.user) {
+        // تسجيل الخروج مؤقتاً لإرسال OTP
+        await supabase.auth.signOut();
+
+        // الحصول على رقم الهاتف من الملف الشخصي
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('phone, full_name')
+          .eq('id', data.user.id)
+          .single();
+
+        // حفظ بيانات المستخدم مؤقتاً
+        localStorage.setItem('pending_login', JSON.stringify({
+          email,
+          password,
+          userId: data.user.id,
+          phone: profileData?.phone || phone,
+          fullName: profileData?.full_name || '',
+        }));
+
+        // عرض خيار اختيار طريقة التحقق
+        setPhone(profileData?.phone || '');
+        setShowLoginOtpSelection(true);
       }
     } catch (error: any) {
       console.error("Sign in error:", error);
@@ -256,6 +278,156 @@ const Auth = () => {
       toast({
         title: t('common.error'),
         description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendLoginOtp = async () => {
+    setLoading(true);
+
+    try {
+      const pendingLogin = localStorage.getItem('pending_login');
+      if (!pendingLogin) {
+        throw new Error('Session expired');
+      }
+
+      const loginData = JSON.parse(pendingLogin);
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      if (loginVerificationMethod === 'sms') {
+        if (!loginData.phone && !phone) {
+          toast({
+            title: t('common.error'),
+            description: t('auth.noPhoneNumber'),
+            variant: "destructive",
+          });
+          setLoading(false);
+          return;
+        }
+
+        const { data: smsData, error: smsError } = await supabase.functions.invoke('send-sms-otp', {
+          body: {
+            phone: loginData.phone || phone,
+            user_name: loginData.fullName,
+          },
+        });
+
+        if (smsError) throw smsError;
+
+        localStorage.setItem('pending_otp', JSON.stringify({
+          email: loginData.email,
+          phone: loginData.phone || phone,
+          password: loginData.password,
+          otp: smsData.otpCode || otpCode,
+          expires: Date.now() + 10 * 60 * 1000,
+          method: 'sms',
+          context: 'login',
+        }));
+
+        toast({
+          title: t('common.success'),
+          description: t('auth.smsOtpSent'),
+        });
+      } else {
+        const { error: emailError } = await supabase.functions.invoke('send-confirmation-email', {
+          body: {
+            email: loginData.email,
+            token: otpCode,
+            email_action_type: 'login',
+            user_name: loginData.fullName,
+          },
+        });
+
+        if (emailError) {
+          console.error('Error sending login OTP email:', emailError);
+        }
+
+        localStorage.setItem('pending_otp', JSON.stringify({
+          email: loginData.email,
+          password: loginData.password,
+          otp: otpCode,
+          expires: Date.now() + 10 * 60 * 1000,
+          method: 'email',
+          context: 'login',
+        }));
+
+        toast({
+          title: t('common.success'),
+          description: t('auth.loginOtpSent'),
+        });
+      }
+
+      setOtpContext('login');
+      setShowLoginOtpSelection(false);
+      setStep('login-verify-otp');
+    } catch (error: any) {
+      console.error("Send login OTP error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyLoginOtp = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidOtp'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const pendingOtp = localStorage.getItem('pending_otp');
+      
+      if (!pendingOtp) {
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      const stored = JSON.parse(pendingOtp);
+
+      if (Date.now() > stored.expires) {
+        localStorage.removeItem('pending_otp');
+        localStorage.removeItem('pending_login');
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      if (otp !== stored.otp) {
+        throw new Error(t('auth.invalidOtp'));
+      }
+
+      // OTP صحيح - تسجيل الدخول
+      localStorage.removeItem('pending_otp');
+      localStorage.removeItem('pending_login');
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: stored.email,
+        password: stored.password,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: t('common.success'),
+        description: t('auth.loginSuccess'),
+      });
+
+      navigate("/profile");
+    } catch (error: any) {
+      console.error("Login OTP verification error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -544,7 +716,91 @@ const Auth = () => {
     );
   }
 
-  // Verify OTP Step
+  // Login Verify OTP Step
+  if (step === "login-verify-otp") {
+    const pendingOtp = localStorage.getItem('pending_otp');
+    const stored = pendingOtp ? JSON.parse(pendingOtp) : null;
+    const displayContact = stored?.method === 'sms' ? (stored.phone || phone) : (stored?.email || email);
+    const isPhoneVerification = stored?.method === 'sms';
+
+    return (
+      <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12">
+          <div className="max-w-md mx-auto">
+            <Card className="animate-scale-in shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  {isPhoneVerification ? (
+                    <MessageSquare className="h-8 w-8 text-white" />
+                  ) : (
+                    <KeyRound className="h-8 w-8 text-white" />
+                  )}
+                </div>
+                <CardTitle className="text-2xl">{t('auth.loginVerification')}</CardTitle>
+                <CardDescription>
+                  {t('auth.otpDescription')} <strong dir="ltr">{displayContact}</strong>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex justify-center" dir="ltr">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    className="gap-2"
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={handleVerifyLoginOtp}
+                  disabled={loading || otp.length !== 6}
+                >
+                  {loading ? t('common.loading') : t('auth.verify')}
+                </Button>
+
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-muted-foreground">
+                    {t('auth.didntReceive')}
+                  </p>
+                  <Button variant="link" onClick={handleResendOtp} disabled={loading}>
+                    {t('auth.resendOtp')}
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setStep("login");
+                    setOtp("");
+                    localStorage.removeItem('pending_otp');
+                    localStorage.removeItem('pending_login');
+                  }}
+                >
+                  <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('common.back')}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Verify OTP Step (Signup)
   if (step === "verify-otp") {
     const pendingOtp = localStorage.getItem('pending_otp');
     const stored = pendingOtp ? JSON.parse(pendingOtp) : null;
@@ -867,6 +1123,66 @@ const Auth = () => {
             </Button>
             <Button onClick={handleForgotPassword} disabled={loading}>
               {loading ? t('common.loading') : t('auth.sendResetLink')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* حوار اختيار طريقة التحقق لتسجيل الدخول */}
+      <Dialog open={showLoginOtpSelection} onOpenChange={(open) => {
+        if (!open) {
+          setShowLoginOtpSelection(false);
+          localStorage.removeItem('pending_login');
+        }
+      }}>
+        <DialogContent dir={isRTL ? 'rtl' : 'ltr'}>
+          <DialogHeader>
+            <DialogTitle>{t('auth.selectLoginMethod')}</DialogTitle>
+            <DialogDescription>
+              {t('auth.loginVerificationDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <RadioGroup
+              value={loginVerificationMethod}
+              onValueChange={(v) => setLoginVerificationMethod(v as VerificationMethod)}
+              className="flex flex-col gap-4"
+            >
+              <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="email" id="login-verify-email" />
+                <Label htmlFor="login-verify-email" className="flex items-center gap-3 cursor-pointer flex-1">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{t('auth.viaEmail')}</p>
+                    <p className="text-sm text-muted-foreground">{email}</p>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="sms" id="login-verify-sms" disabled={!phone} />
+                <Label htmlFor="login-verify-sms" className={`flex items-center gap-3 cursor-pointer flex-1 ${!phone ? 'opacity-50' : ''}`}>
+                  <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{t('auth.viaSms')}</p>
+                    <p className="text-sm text-muted-foreground" dir="ltr">{phone || t('auth.noPhoneNumber')}</p>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => {
+              setShowLoginOtpSelection(false);
+              localStorage.removeItem('pending_login');
+            }}>
+              {t('common.cancel')}
+            </Button>
+            <Button onClick={handleSendLoginOtp} disabled={loading}>
+              {loading ? t('common.loading') : t('auth.sendCode')}
             </Button>
           </DialogFooter>
         </DialogContent>
