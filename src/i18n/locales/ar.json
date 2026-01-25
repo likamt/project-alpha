@@ -204,7 +204,15 @@
     "selectLoginMethod": "اختر طريقة التحقق للدخول",
     "loginVerification": "تأكيد تسجيل الدخول",
     "loginVerificationDesc": "لأمانك، سنرسل لك كود تحقق للتأكد من هويتك",
-    "sendCode": "إرسال الكود"
+    "sendCode": "إرسال الكود",
+    "resetSmsSent": "تم إرسال كود إعادة تعيين كلمة المرور إلى هاتفك",
+    "phoneNotFound": "رقم الهاتف غير مسجل في النظام",
+    "otpVerified": "تم التحقق من الكود بنجاح",
+    "sessionExpired": "انتهت صلاحية الجلسة، يرجى المحاولة مرة أخرى",
+    "resetPasswordTitle": "استعادة كلمة المرور",
+    "resetPasswordDesc": "اختر طريقة استعادة كلمة المرور",
+    "enterResetOtp": "أدخل كود التحقق المرسل إليك",
+    "setNewPasswordTitle": "تعيين كلمة مرور جديدة"
   },
   "upload": {
     "uploading": "جاري الرفع...",

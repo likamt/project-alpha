@@ -15,9 +15,9 @@ import { Mail, Lock, User, Phone, Eye, EyeOff, KeyRound, ArrowLeft, MessageSquar
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-type AuthStep = "login" | "signup" | "verify-otp" | "reset-password" | "login-verify-otp";
+type AuthStep = "login" | "signup" | "verify-otp" | "reset-password" | "login-verify-otp" | "reset-verify-otp" | "set-new-password";
 type VerificationMethod = "email" | "sms";
-type OtpContext = "signup" | "login";
+type OtpContext = "signup" | "login" | "reset";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -37,6 +37,8 @@ const Auth = () => {
   const [otp, setOtp] = useState("");
   const [resetDialogOpen, setResetDialogOpen] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
+  const [resetPhone, setResetPhone] = useState("");
+  const [resetMethod, setResetMethod] = useState<VerificationMethod>("email");
   const [loginVerificationMethod, setLoginVerificationMethod] = useState<VerificationMethod>("email");
   const [showLoginOtpSelection, setShowLoginOtpSelection] = useState(false);
   const [otpContext, setOtpContext] = useState<OtpContext>("signup");
@@ -496,7 +498,7 @@ const Auth = () => {
   };
 
   const handleForgotPassword = async () => {
-    if (!validateEmail(resetEmail)) {
+    if (resetMethod === "email" && !validateEmail(resetEmail)) {
       toast({
         title: t('common.error'),
         description: t('auth.invalidEmail'),
@@ -505,23 +507,191 @@ const Auth = () => {
       return;
     }
 
+    if (resetMethod === "sms" && !validatePhone(resetPhone)) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidPhone'),
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-        redirectTo: `${window.location.origin}/auth?reset=true`,
+      const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+      if (resetMethod === "sms") {
+        // البحث عن المستخدم بواسطة رقم الهاتف
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .eq('phone', resetPhone)
+          .single();
+
+        if (profileError || !profileData) {
+          throw new Error(t('auth.phoneNotFound'));
+        }
+
+        // إرسال OTP عبر SMS
+        const { data: smsData, error: smsError } = await supabase.functions.invoke('send-sms-otp', {
+          body: {
+            phone: resetPhone,
+            user_name: profileData.full_name,
+          },
+        });
+
+        if (smsError) throw smsError;
+
+        // حفظ بيانات الاستعادة مؤقتاً
+        localStorage.setItem('pending_reset', JSON.stringify({
+          phone: resetPhone,
+          userId: profileData.id,
+          otp: smsData.otpCode || otpCode,
+          expires: Date.now() + 10 * 60 * 1000,
+          method: 'sms',
+        }));
+
+        toast({
+          title: t('common.success'),
+          description: t('auth.resetSmsSent'),
+        });
+
+        setResetDialogOpen(false);
+        setOtpContext('reset');
+        setStep('reset-verify-otp');
+      } else {
+        // إرسال رابط استعادة كلمة المرور عبر البريد
+        const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+          redirectTo: `${window.location.origin}/auth?reset=true`,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: t('common.success'),
+          description: t('auth.resetEmailSent'),
+        });
+
+        setResetDialogOpen(false);
+      }
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyResetOtp = async () => {
+    if (otp.length !== 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.invalidOtp'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const pendingReset = localStorage.getItem('pending_reset');
+      
+      if (!pendingReset) {
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      const stored = JSON.parse(pendingReset);
+
+      if (Date.now() > stored.expires) {
+        localStorage.removeItem('pending_reset');
+        throw new Error(t('auth.otpExpired'));
+      }
+
+      if (otp !== stored.otp) {
+        throw new Error(t('auth.invalidOtp'));
+      }
+
+      // OTP صحيح - انتقل لصفحة تعيين كلمة المرور الجديدة
+      toast({
+        title: t('common.success'),
+        description: t('auth.otpVerified'),
+      });
+
+      setOtp('');
+      setStep('set-new-password');
+    } catch (error: any) {
+      console.error("Reset OTP verification error:", error);
+      toast({
+        title: t('common.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordMismatch'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: t('common.error'),
+        description: t('auth.passwordTooShort'),
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const pendingReset = localStorage.getItem('pending_reset');
+      
+      if (!pendingReset) {
+        throw new Error(t('auth.sessionExpired'));
+      }
+
+      const stored = JSON.parse(pendingReset);
+
+      // تحديث كلمة المرور عبر الـ admin API (edge function)
+      const { error } = await supabase.functions.invoke('reset-password-sms', {
+        body: {
+          userId: stored.userId,
+          newPassword: newPassword,
+        },
       });
 
       if (error) throw error;
 
+      localStorage.removeItem('pending_reset');
+
       toast({
         title: t('common.success'),
-        description: t('auth.resetEmailSent'),
+        description: t('auth.passwordUpdated'),
       });
 
-      setResetDialogOpen(false);
+      // إعادة التوجيه لصفحة تسجيل الدخول
+      setStep('login');
+      setNewPassword('');
+      setConfirmNewPassword('');
     } catch (error: any) {
-      console.error("Password reset error:", error);
+      console.error("Set new password error:", error);
       toast({
         title: t('common.error'),
         description: error.message,
@@ -659,6 +829,149 @@ const Auth = () => {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleUpdatePassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">{t('auth.newPassword')}</Label>
+                    <div className="relative">
+                      <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
+                      <Input
+                        id="newPassword"
+                        type={showPassword ? "text" : "password"}
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                        className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
+                        required
+                        minLength={6}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className={`absolute ${isRTL ? 'left-1' : 'right-1'} top-1 h-8 w-8`}
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmNewPassword">{t('auth.confirmPassword')}</Label>
+                    <div className="relative">
+                      <Lock className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
+                      <Input
+                        id="confirmNewPassword"
+                        type="password"
+                        value={confirmNewPassword}
+                        onChange={(e) => setConfirmNewPassword(e.target.value)}
+                        className={isRTL ? 'pr-10' : 'pl-10'}
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                    {newPassword && confirmNewPassword && newPassword !== confirmNewPassword && (
+                      <p className="text-sm text-destructive">{t('auth.passwordMismatch')}</p>
+                    )}
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? t('common.loading') : t('auth.updatePassword')}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Reset Verify OTP Step
+  if (step === "reset-verify-otp") {
+    const pendingReset = localStorage.getItem('pending_reset');
+    const stored = pendingReset ? JSON.parse(pendingReset) : null;
+    const displayContact = stored?.phone || resetPhone;
+
+    return (
+      <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12">
+          <div className="max-w-md mx-auto">
+            <Card className="animate-scale-in shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <MessageSquare className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">{t('auth.resetPasswordTitle')}</CardTitle>
+                <CardDescription>
+                  {t('auth.enterResetOtp')} <strong dir="ltr">{displayContact}</strong>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="flex justify-center" dir="ltr">
+                  <InputOTP
+                    maxLength={6}
+                    value={otp}
+                    onChange={setOtp}
+                    className="gap-2"
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </div>
+
+                <Button
+                  className="w-full"
+                  onClick={handleVerifyResetOtp}
+                  disabled={loading || otp.length !== 6}
+                >
+                  {loading ? t('common.loading') : t('auth.verify')}
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  className="w-full"
+                  onClick={() => {
+                    setStep("login");
+                    setOtp("");
+                    localStorage.removeItem('pending_reset');
+                  }}
+                >
+                  <ArrowLeft className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                  {t('common.back')}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Set New Password Step (after SMS OTP verification)
+  if (step === "set-new-password") {
+    return (
+      <div className="min-h-screen bg-gradient-subtle" dir={isRTL ? 'rtl' : 'ltr'}>
+        <Navbar />
+        <div className="container mx-auto px-4 pt-24 pb-12">
+          <div className="max-w-md mx-auto">
+            <Card className="animate-scale-in shadow-2xl">
+              <CardHeader className="text-center">
+                <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                  <KeyRound className="h-8 w-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">{t('auth.setNewPasswordTitle')}</CardTitle>
+                <CardDescription>{t('auth.enterNewPassword')}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSetNewPassword} className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">{t('auth.newPassword')}</Label>
                     <div className="relative">
@@ -1098,31 +1411,86 @@ const Auth = () => {
 
       {/* حوار استعادة كلمة المرور */}
       <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
-        <DialogContent dir={isRTL ? 'rtl' : 'ltr'}>
+        <DialogContent dir={isRTL ? 'rtl' : 'ltr'} className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{t('auth.forgotPassword')}</DialogTitle>
+            <DialogTitle>{t('auth.resetPasswordTitle')}</DialogTitle>
             <DialogDescription>
-              {t('auth.resetDescription')}
+              {t('auth.resetPasswordDesc')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="resetEmail">{t('auth.email')}</Label>
-              <Input
-                id="resetEmail"
-                type="email"
-                placeholder="example@email.com"
-                value={resetEmail}
-                onChange={(e) => setResetEmail(e.target.value)}
-              />
-            </div>
+            {/* اختيار طريقة الاستعادة */}
+            <RadioGroup
+              value={resetMethod}
+              onValueChange={(v) => setResetMethod(v as VerificationMethod)}
+              className="flex flex-col gap-3"
+            >
+              <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="email" id="reset-email" />
+                <Label htmlFor="reset-email" className="flex items-center gap-3 cursor-pointer flex-1">
+                  <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{t('auth.viaEmail')}</p>
+                    <p className="text-sm text-muted-foreground">{t('auth.resetDescription')}</p>
+                  </div>
+                </Label>
+              </div>
+              <div className="flex items-center space-x-3 rtl:space-x-reverse p-3 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                <RadioGroupItem value="sms" id="reset-sms" />
+                <Label htmlFor="reset-sms" className="flex items-center gap-3 cursor-pointer flex-1">
+                  <div className="w-10 h-10 bg-success/10 rounded-full flex items-center justify-center">
+                    <MessageSquare className="h-5 w-5 text-success" />
+                  </div>
+                  <div>
+                    <p className="font-medium">{t('auth.viaSms')}</p>
+                    <p className="text-sm text-muted-foreground">{t('auth.enterPhoneNumber')}</p>
+                  </div>
+                </Label>
+              </div>
+            </RadioGroup>
+
+            {/* حقل الإدخال حسب الاختيار */}
+            {resetMethod === "email" ? (
+              <div className="space-y-2">
+                <Label htmlFor="resetEmail">{t('auth.email')}</Label>
+                <div className="relative">
+                  <Mail className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
+                  <Input
+                    id="resetEmail"
+                    type="email"
+                    placeholder="example@email.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    className={isRTL ? 'pr-10' : 'pl-10'}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <Label htmlFor="resetPhone">{t('auth.phone')}</Label>
+                <div className="relative">
+                  <Phone className={`absolute ${isRTL ? 'right-3' : 'left-3'} top-3 h-4 w-4 text-muted-foreground`} />
+                  <Input
+                    id="resetPhone"
+                    type="tel"
+                    placeholder={t('auth.phonePlaceholder')}
+                    value={resetPhone}
+                    onChange={(e) => setResetPhone(e.target.value)}
+                    className={isRTL ? 'pr-10' : 'pl-10'}
+                    dir="ltr"
+                  />
+                </div>
+              </div>
+            )}
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setResetDialogOpen(false)}>
               {t('common.cancel')}
             </Button>
             <Button onClick={handleForgotPassword} disabled={loading}>
-              {loading ? t('common.loading') : t('auth.sendResetLink')}
+              {loading ? t('common.loading') : t('auth.sendCode')}
             </Button>
           </DialogFooter>
         </DialogContent>
