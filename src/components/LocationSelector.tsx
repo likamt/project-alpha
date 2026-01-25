@@ -109,7 +109,7 @@ const LocationSelector = ({
           {t("common.country")} {required && "*"}
         </Label>
         <Select
-          value={selectedCountryId}
+          value={selectedCountryId || undefined}
           onValueChange={(value) => {
             onCountryChange(value);
             onCityChange(""); // Reset city when country changes
@@ -134,7 +134,7 @@ const LocationSelector = ({
           {t("common.city")} {required && "*"}
         </Label>
         <Select
-          value={selectedCityId}
+          value={selectedCityId || undefined}
           onValueChange={onCityChange}
           disabled={!selectedCountryId || cities.length === 0}
         >
