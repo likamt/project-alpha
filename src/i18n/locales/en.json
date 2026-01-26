@@ -45,6 +45,9 @@
     "selectCity": "Select city",
     "selectCountryFirst": "Select country first",
     "selectLocation": "Please select country and city",
+    "allCountries": "All Countries",
+    "allCities": "All Cities",
+    "clearFilters": "Clear Filters",
     "optional": "Optional",
     "minutes": "minutes"
   },

@@ -45,6 +45,9 @@
     "selectCity": "Sélectionner la ville",
     "selectCountryFirst": "Sélectionnez d'abord le pays",
     "selectLocation": "Veuillez sélectionner le pays et la ville",
+    "allCountries": "Tous les pays",
+    "allCities": "Toutes les villes",
+    "clearFilters": "Effacer les filtres",
     "optional": "Optionnel",
     "minutes": "minutes"
   },
