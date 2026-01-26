@@ -1,0 +1,32 @@
+{
+  "name": "خدمة سريعة - HIRAF",
+  "short_name": "HIRAF",
+  "description": "منصة متعددة الخدمات للطبخ المنزلي وخدمات التنظيف",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "500x500",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["food", "lifestyle", "utilities"],
+  "lang": "ar",
+  "dir": "rtl"
+}
