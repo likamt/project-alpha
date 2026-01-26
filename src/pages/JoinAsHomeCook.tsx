@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -9,10 +11,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { ChefHat, Loader2 } from "lucide-react";
+import { homeCookRegistrationSchema, type HomeCookRegistrationData } from "@/lib/validationSchemas";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
 const specialtiesList = [
   "طبخ مغربي",
@@ -33,15 +43,20 @@ const JoinAsHomeCook = () => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [formData, setFormData] = useState({
-    description: "",
-    hourlyRate: "",
-    location: "",
-    minOrderAmount: "",
-    deliveryAvailable: true,
-    specialties: [] as string[],
-    countryId: "",
-    cityId: "",
+  const [checkingUser, setCheckingUser] = useState(true);
+
+  const form = useForm<HomeCookRegistrationData>({
+    resolver: zodResolver(homeCookRegistrationSchema),
+    defaultValues: {
+      description: "",
+      hourlyRate: "",
+      minOrderAmount: "",
+      location: "",
+      countryId: "",
+      cityId: "",
+      specialties: [],
+      deliveryAvailable: true,
+    },
   });
 
   useEffect(() => {
@@ -49,49 +64,33 @@ const JoinAsHomeCook = () => {
   }, []);
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({
-        title: "يجب تسجيل الدخول",
-        description: "يرجى تسجيل الدخول أولاً للانضمام كطاهية منزلية",
-        variant: "destructive",
-      });
-      navigate("/auth");
-      return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({
+          title: "يجب تسجيل الدخول",
+          description: "يرجى تسجيل الدخول أولاً للانضمام كطاهية منزلية",
+          variant: "destructive",
+        });
+        navigate("/auth");
+        return;
+      }
+      setUser(user);
+    } finally {
+      setCheckingUser(false);
     }
-    setUser(user);
   };
 
   const handleSpecialtyToggle = (specialty: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      specialties: prev.specialties.includes(specialty)
-        ? prev.specialties.filter((s) => s !== specialty)
-        : [...prev.specialties, specialty],
-    }));
+    const current = form.getValues("specialties");
+    const updated = current.includes(specialty)
+      ? current.filter((s) => s !== specialty)
+      : [...current, specialty];
+    form.setValue("specialties", updated, { shouldValidate: true });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: HomeCookRegistrationData) => {
     if (!user) return;
-
-    if (formData.specialties.length === 0) {
-      toast({
-        title: t("common.error"),
-        description: "يرجى اختيار تخصص واحد على الأقل",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!formData.countryId || !formData.cityId) {
-      toast({
-        title: t("common.error"),
-        description: t("common.selectLocation"),
-        variant: "destructive",
-      });
-      return;
-    }
 
     setLoading(true);
     try {
@@ -115,34 +114,24 @@ const JoinAsHomeCook = () => {
       // Insert home cook
       const { error: cookError } = await supabase.from("home_cooks").insert({
         user_id: user.id,
-        description: formData.description,
-        hourly_rate: parseFloat(formData.hourlyRate) || 0,
-        location: formData.location,
-        min_order_amount: parseFloat(formData.minOrderAmount) || 0,
-        delivery_available: formData.deliveryAvailable,
-        specialties: formData.specialties,
-        country_id: formData.countryId,
-        city_id: formData.cityId,
+        description: data.description.trim(),
+        hourly_rate: data.hourlyRate ? parseFloat(data.hourlyRate) : 0,
+        location: data.location?.trim() || null,
+        min_order_amount: data.minOrderAmount ? parseFloat(data.minOrderAmount) : 0,
+        delivery_available: data.deliveryAvailable,
+        specialties: data.specialties,
+        country_id: data.countryId,
+        city_id: data.cityId,
       });
 
       if (cookError) throw cookError;
-
-      // Add role
-      const { error: roleError } = await supabase.from("user_roles").insert({
-        user_id: user.id,
-        role: "home_cook",
-      });
-
-      if (roleError && !roleError.message.includes("duplicate")) {
-        throw roleError;
-      }
 
       toast({
         title: "تم التسجيل بنجاح!",
         description: "مرحباً بك في منصة خدمة سريعة كطاهية منزلية",
       });
 
-      navigate("/home-cooking");
+      navigate("/home-cook-dashboard");
     } catch (error: any) {
       console.error("Error:", error);
       toast({
@@ -154,6 +143,14 @@ const JoinAsHomeCook = () => {
       setLoading(false);
     }
   };
+
+  if (checkingUser) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-orange-500" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col" dir="rtl">
@@ -175,108 +172,162 @@ const JoinAsHomeCook = () => {
             </CardHeader>
 
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="description">نبذة عنك وعن طبخك</Label>
-                  <Textarea
-                    id="description"
-                    placeholder="اكتبي وصفاً مختصراً عن خبرتك في الطبخ وأنواع الأطباق التي تتقنيها..."
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={4}
-                    required
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                  {/* Description */}
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>نبذة عنك وعن طبخك *</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="اكتبي وصفاً مختصراً عن خبرتك في الطبخ وأنواع الأطباق التي تتقنيها..."
+                            rows={4}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div className="space-y-2">
-                  <Label>التخصصات</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    {specialtiesList.map((specialty) => (
-                      <div key={specialty} className="flex items-center space-x-2 space-x-reverse">
-                        <Checkbox
-                          id={specialty}
-                          checked={formData.specialties.includes(specialty)}
-                          onCheckedChange={() => handleSpecialtyToggle(specialty)}
-                        />
-                        <Label htmlFor={specialty} className="cursor-pointer">
-                          {specialty}
-                        </Label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  {/* Specialties */}
+                  <FormField
+                    control={form.control}
+                    name="specialties"
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>التخصصات *</FormLabel>
+                        <div className="grid grid-cols-2 gap-3">
+                          {specialtiesList.map((specialty) => (
+                            <div key={specialty} className="flex items-center space-x-2 space-x-reverse">
+                              <Checkbox
+                                id={specialty}
+                                checked={form.watch("specialties").includes(specialty)}
+                                onCheckedChange={() => handleSpecialtyToggle(specialty)}
+                              />
+                              <label htmlFor={specialty} className="cursor-pointer text-sm">
+                                {specialty}
+                              </label>
+                            </div>
+                          ))}
+                        </div>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="hourlyRate">سعر الساعة (د.م)</Label>
-                    <Input
-                      id="hourlyRate"
-                      type="number"
-                      placeholder="50"
-                      value={formData.hourlyRate}
-                      onChange={(e) => setFormData({ ...formData, hourlyRate: e.target.value })}
-                      min="0"
+                  {/* Pricing */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="hourlyRate"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>سعر الساعة (د.م)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="50"
+                              min="0"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="minOrderAmount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>الحد الأدنى للطلب (د.م)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="100"
+                              min="0"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="minOrderAmount">الحد الأدنى للطلب (د.م)</Label>
-                    <Input
-                      id="minOrderAmount"
-                      type="number"
-                      placeholder="100"
-                      value={formData.minOrderAmount}
-                      onChange={(e) => setFormData({ ...formData, minOrderAmount: e.target.value })}
-                      min="0"
+                  {/* Location Selection */}
+                  <div className="space-y-4">
+                    <LocationSelector
+                      selectedCountryId={form.watch("countryId")}
+                      selectedCityId={form.watch("cityId")}
+                      onCountryChange={(id) => form.setValue("countryId", id, { shouldValidate: true })}
+                      onCityChange={(id) => form.setValue("cityId", id, { shouldValidate: true })}
+                      required
                     />
+                    {form.formState.errors.countryId && (
+                      <p className="text-sm text-destructive">{form.formState.errors.countryId.message}</p>
+                    )}
+                    {form.formState.errors.cityId && (
+                      <p className="text-sm text-destructive">{form.formState.errors.cityId.message}</p>
+                    )}
                   </div>
-                </div>
 
-                {/* Location Selection */}
-                <LocationSelector
-                  selectedCountryId={formData.countryId}
-                  selectedCityId={formData.cityId}
-                  onCountryChange={(id) => setFormData({ ...formData, countryId: id })}
-                  onCityChange={(id) => setFormData({ ...formData, cityId: id })}
-                  required
-                />
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">العنوان التفصيلي</Label>
-                  <Input
-                    id="location"
-                    placeholder="الحي، الشارع..."
-                    value={formData.location}
-                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  {/* Detailed Address */}
+                  <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>العنوان التفصيلي</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="الحي، الشارع..."
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </div>
 
-                <div className="flex items-center space-x-2 space-x-reverse">
-                  <Checkbox
-                    id="deliveryAvailable"
-                    checked={formData.deliveryAvailable}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, deliveryAvailable: checked as boolean })
-                    }
+                  {/* Delivery Available */}
+                  <FormField
+                    control={form.control}
+                    name="deliveryAvailable"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-2 space-x-reverse">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="cursor-pointer">خدمة التوصيل متاحة</FormLabel>
+                      </FormItem>
+                    )}
                   />
-                  <Label htmlFor="deliveryAvailable">خدمة التوصيل متاحة</Label>
-                </div>
 
-                <Button
-                  type="submit"
-                  className="w-full bg-orange-500 hover:bg-orange-600"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-                      جاري التسجيل...
-                    </>
-                  ) : (
-                    "انضمي الآن"
-                  )}
-                </Button>
-              </form>
+                  <Button
+                    type="submit"
+                    className="w-full bg-orange-500 hover:bg-orange-600"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                        جاري التسجيل...
+                      </>
+                    ) : (
+                      "انضمي الآن"
+                    )}
+                  </Button>
+                </form>
+              </Form>
             </CardContent>
           </Card>
         </div>
