@@ -139,6 +139,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "craftsmen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       food_dishes: {
@@ -205,6 +212,13 @@ export type Database = {
             columns: ["cook_id"]
             isOneToOne: false
             referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_dishes_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "public_home_cooks"
             referencedColumns: ["id"]
           },
         ]
@@ -289,6 +303,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "food_orders_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "public_home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "food_orders_country_id_fkey"
             columns: ["country_id"]
             isOneToOne: false
@@ -338,6 +359,13 @@ export type Database = {
             columns: ["cook_id"]
             isOneToOne: false
             referencedRelation: "home_cooks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "food_ratings_cook_id_fkey"
+            columns: ["cook_id"]
+            isOneToOne: false
+            referencedRelation: "public_home_cooks"
             referencedColumns: ["id"]
           },
           {
@@ -456,6 +484,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "home_cooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       house_worker_ratings: {
@@ -502,6 +537,13 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "house_workers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_worker_ratings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "public_house_workers"
             referencedColumns: ["id"]
           },
         ]
@@ -634,6 +676,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "house_workers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       messages: {
@@ -692,10 +741,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "messages_sender_id_fkey"
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -794,10 +857,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "orders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "orders_craftsman_id_fkey"
             columns: ["craftsman_id"]
             isOneToOne: false
             referencedRelation: "craftsmen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "orders_craftsman_id_fkey"
+            columns: ["craftsman_id"]
+            isOneToOne: false
+            referencedRelation: "public_craftsmen"
             referencedColumns: ["id"]
           },
         ]
@@ -905,10 +982,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ratings_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ratings_craftsman_id_fkey"
             columns: ["craftsman_id"]
             isOneToOne: false
             referencedRelation: "craftsmen"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ratings_craftsman_id_fkey"
+            columns: ["craftsman_id"]
+            isOneToOne: false
+            referencedRelation: "public_craftsmen"
             referencedColumns: ["id"]
           },
           {
@@ -1069,11 +1160,285 @@ export type Database = {
             referencedRelation: "house_workers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "worker_bookings_worker_id_fkey"
+            columns: ["worker_id"]
+            isOneToOne: false
+            referencedRelation: "public_house_workers"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }
     Views: {
-      [_ in never]: never
+      public_craftsmen: {
+        Row: {
+          availability: Json | null
+          completed_orders: number | null
+          created_at: string | null
+          description: string | null
+          hourly_rate: number | null
+          id: string | null
+          is_verified: boolean | null
+          location: string | null
+          portfolio_images: string[] | null
+          profession: string | null
+          rating: number | null
+          services: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          location?: string | null
+          portfolio_images?: string[] | null
+          profession?: string | null
+          rating?: number | null
+          services?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          completed_orders?: number | null
+          created_at?: string | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          location?: string | null
+          portfolio_images?: string[] | null
+          profession?: string | null
+          rating?: number | null
+          services?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "craftsmen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "craftsmen_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_home_cooks: {
+        Row: {
+          availability: Json | null
+          city_id: string | null
+          completed_orders: number | null
+          country_id: string | null
+          created_at: string | null
+          delivery_available: boolean | null
+          description: string | null
+          hourly_rate: number | null
+          id: string | null
+          is_verified: boolean | null
+          location: string | null
+          min_order_amount: number | null
+          portfolio_images: string[] | null
+          rating: number | null
+          specialties: string[] | null
+          user_id: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          city_id?: string | null
+          completed_orders?: number | null
+          country_id?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          location?: string | null
+          min_order_amount?: number | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          specialties?: string[] | null
+          user_id?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          city_id?: string | null
+          completed_orders?: number | null
+          country_id?: string | null
+          created_at?: string | null
+          delivery_available?: boolean | null
+          description?: string | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          location?: string | null
+          min_order_amount?: number | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          specialties?: string[] | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "home_cooks_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_cooks_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_cooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "home_cooks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_house_workers: {
+        Row: {
+          availability: Json | null
+          available_days: string[] | null
+          city_id: string | null
+          completed_orders: number | null
+          country_id: string | null
+          created_at: string | null
+          description: string | null
+          experience_years: number | null
+          hourly_rate: number | null
+          id: string | null
+          is_verified: boolean | null
+          languages: string[] | null
+          location: string | null
+          nationality: string | null
+          portfolio_images: string[] | null
+          rating: number | null
+          service_category: string | null
+          services: string[] | null
+          user_id: string | null
+          work_type: string | null
+        }
+        Insert: {
+          availability?: Json | null
+          available_days?: string[] | null
+          city_id?: string | null
+          completed_orders?: number | null
+          country_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          location?: string | null
+          nationality?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          service_category?: string | null
+          services?: string[] | null
+          user_id?: string | null
+          work_type?: string | null
+        }
+        Update: {
+          availability?: Json | null
+          available_days?: string[] | null
+          city_id?: string | null
+          completed_orders?: number | null
+          country_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          experience_years?: number | null
+          hourly_rate?: number | null
+          id?: string | null
+          is_verified?: boolean | null
+          languages?: string[] | null
+          location?: string | null
+          nationality?: string | null
+          portfolio_images?: string[] | null
+          rating?: number | null
+          service_category?: string | null
+          services?: string[] | null
+          user_id?: string | null
+          work_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "house_workers_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_workers_country_id_fkey"
+            columns: ["country_id"]
+            isOneToOne: false
+            referencedRelation: "countries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_workers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "house_workers_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      public_profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_roles: {
@@ -1088,6 +1453,10 @@ export type Database = {
         Returns: boolean
       }
       reset_monthly_tasks_count: { Args: never; Returns: undefined }
+      user_has_active_subscription: {
+        Args: { _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "client" | "craftsman" | "house_worker" | "home_cook"
