@@ -17,6 +17,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "./LanguageSwitcher";
 import NotificationBell from "./NotificationBell";
+import logoImage from "@/assets/logo.png";
 
 const Navbar = () => {
   const { t, i18n } = useTranslation();
@@ -99,12 +100,14 @@ const Navbar = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-3 space-x-reverse">
-            <div className="w-10 h-10 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Package className="h-6 w-6 text-white" />
-            </div>
+          <Link to="/" className="flex items-center gap-3">
+            <img 
+              src={logoImage} 
+              alt="HIRAF Logo" 
+              className="w-10 h-10 rounded-lg object-cover"
+            />
             <span className="text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              خدمة سريعة
+              HIRAF
             </span>
           </Link>
 
