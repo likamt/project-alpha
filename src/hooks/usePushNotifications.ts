@@ -71,9 +71,27 @@ export const usePushNotifications = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Store token in a push_tokens table or in user profile
-      // For now, we'll log it - you can create a push_tokens table later
-      console.log('Push token for user', user.id, ':', pushToken);
+      // Detect platform
+      const platform = Capacitor.getPlatform(); // 'ios', 'android', or 'web'
+      
+      // Upsert token to database
+      const { error } = await supabase
+        .from('push_tokens')
+        .upsert({
+          user_id: user.id,
+          token: pushToken,
+          platform: platform,
+          is_active: true,
+          updated_at: new Date().toISOString(),
+        }, {
+          onConflict: 'user_id,token'
+        });
+
+      if (error) {
+        console.error('Error saving push token:', error);
+      } else {
+        console.log('Push token saved successfully');
+      }
       
     } catch (error) {
       console.error('Error saving push token:', error);

@@ -45,6 +45,9 @@
     "selectCity": "اختر المدينة",
     "selectCountryFirst": "اختر الدولة أولاً",
     "selectLocation": "يرجى اختيار الدولة والمدينة",
+    "allCountries": "جميع الدول",
+    "allCities": "جميع المدن",
+    "clearFilters": "مسح الفلاتر",
     "optional": "اختياري",
     "minutes": "دقيقة"
   },
