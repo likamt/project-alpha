@@ -153,7 +153,7 @@ const LocationSelector = ({
             onChange={handleCountryChange}
             disabled={countriesLoading}
             required={required}
-            className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background pe-10 ps-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={t("common.selectCountry")}
           >
             <option value="">
@@ -171,7 +171,7 @@ const LocationSelector = ({
               </option>
             ))}
           </select>
-          <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
             {countriesLoading ? (
               <Loader2 className="h-4 w-4 animate-spin opacity-50" />
             ) : (
@@ -196,7 +196,7 @@ const LocationSelector = ({
             onChange={handleCityChange}
             disabled={!selectedCountryId || citiesLoading}
             required={required}
-            className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background pe-10 ps-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={t("common.selectCity")}
           >
             <option value="">
@@ -218,7 +218,7 @@ const LocationSelector = ({
               </option>
             ))}
           </select>
-          <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
             {citiesLoading ? (
               <Loader2 className="h-4 w-4 animate-spin opacity-50" />
             ) : (
