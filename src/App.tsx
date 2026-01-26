@@ -21,6 +21,8 @@ import MyOrders from "./pages/MyOrders";
 import MyBookings from "./pages/MyBookings";
 import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
+import TermsOfService from "./pages/TermsOfService";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -48,6 +50,8 @@ const App = () => (
           <Route path="/my-bookings" element={<MyBookings />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
