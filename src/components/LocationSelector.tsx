@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { MapPin } from "lucide-react";
+import { MapPin, ChevronDown } from "lucide-react";
 
 interface Country {
   id: string;
@@ -108,24 +107,25 @@ const LocationSelector = ({
           <MapPin className="h-4 w-4" />
           {t("common.country")} {required && "*"}
         </Label>
-        <Select
-          value={selectedCountryId || undefined}
-          onValueChange={(value) => {
-            onCountryChange(value);
-            onCityChange(""); // Reset city when country changes
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t("common.selectCountry")} />
-          </SelectTrigger>
-          <SelectContent>
+        <div className="relative">
+          <select
+            value={selectedCountryId}
+            onChange={(e) => {
+              onCountryChange(e.target.value);
+              onCityChange(""); // Reset city when country changes
+            }}
+            className="flex h-10 w-full appearance-none items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            disabled={loading}
+          >
+            <option value="">{t("common.selectCountry")}</option>
             {countries.map((country) => (
-              <SelectItem key={country.id} value={country.id}>
+              <option key={country.id} value={country.id}>
                 {getLocalizedName(country)}
-              </SelectItem>
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+          <ChevronDown className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -133,28 +133,26 @@ const LocationSelector = ({
           <MapPin className="h-4 w-4" />
           {t("common.city")} {required && "*"}
         </Label>
-        <Select
-          value={selectedCityId || undefined}
-          onValueChange={onCityChange}
-          disabled={!selectedCountryId || cities.length === 0}
-        >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={
-                !selectedCountryId
-                  ? t("common.selectCountryFirst")
-                  : t("common.selectCity")
-              }
-            />
-          </SelectTrigger>
-          <SelectContent>
+        <div className="relative">
+          <select
+            value={selectedCityId}
+            onChange={(e) => onCityChange(e.target.value)}
+            disabled={!selectedCountryId || cities.length === 0}
+            className="flex h-10 w-full appearance-none items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <option value="">
+              {!selectedCountryId
+                ? t("common.selectCountryFirst")
+                : t("common.selectCity")}
+            </option>
             {cities.map((city) => (
-              <SelectItem key={city.id} value={city.id}>
+              <option key={city.id} value={city.id}>
                 {getLocalizedName(city)}
-              </SelectItem>
+              </option>
             ))}
-          </SelectContent>
-        </Select>
+          </select>
+          <ChevronDown className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+        </div>
       </div>
     </div>
   );
