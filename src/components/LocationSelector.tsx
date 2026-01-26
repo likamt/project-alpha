@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { Label } from "@/components/ui/label";
-import { MapPin, ChevronDown } from "lucide-react";
+import { MapPin, ChevronDown, Loader2 } from "lucide-react";
 
 interface Country {
   id: string;
@@ -42,81 +42,100 @@ const LocationSelector = ({
   const { t, i18n } = useTranslation();
   const [countries, setCountries] = useState<Country[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [countriesLoading, setCountriesLoading] = useState(true);
   const [citiesLoading, setCitiesLoading] = useState(false);
+  const [countriesError, setCountriesError] = useState<string | null>(null);
+  const [citiesError, setCitiesError] = useState<string | null>(null);
 
+  // Load countries on mount
   useEffect(() => {
+    const loadCountries = async () => {
+      try {
+        setCountriesLoading(true);
+        setCountriesError(null);
+        
+        const { data, error } = await supabase
+          .from("countries")
+          .select("*")
+          .eq("is_active", true)
+          .order("name_ar");
+
+        if (error) {
+          console.error("Error loading countries:", error);
+          setCountriesError("فشل في تحميل الدول");
+          return;
+        }
+        
+        setCountries(data || []);
+      } catch (error) {
+        console.error("Exception loading countries:", error);
+        setCountriesError("فشل في تحميل الدول");
+      } finally {
+        setCountriesLoading(false);
+      }
+    };
+
     loadCountries();
   }, []);
 
+  // Load cities when country changes
   useEffect(() => {
-    if (selectedCountryId) {
-      loadCities(selectedCountryId);
-    } else {
-      setCities([]);
-    }
+    const loadCities = async () => {
+      // Reset cities when no country is selected
+      if (!selectedCountryId) {
+        setCities([]);
+        return;
+      }
+
+      try {
+        setCitiesLoading(true);
+        setCitiesError(null);
+        
+        console.log("Fetching cities for country:", selectedCountryId);
+        
+        const { data, error } = await supabase
+          .from("cities")
+          .select("*")
+          .eq("country_id", selectedCountryId)
+          .eq("is_active", true)
+          .order("name_ar");
+
+        if (error) {
+          console.error("Error loading cities:", error);
+          setCitiesError("فشل في تحميل المدن");
+          return;
+        }
+        
+        console.log("Loaded cities:", data);
+        setCities(data || []);
+      } catch (error) {
+        console.error("Exception loading cities:", error);
+        setCitiesError("فشل في تحميل المدن");
+      } finally {
+        setCitiesLoading(false);
+      }
+    };
+
+    loadCities();
   }, [selectedCountryId]);
 
-  const loadCountries = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("countries")
-        .select("*")
-        .eq("is_active", true)
-        .order("name_ar");
-
-      if (error) throw error;
-      console.log("Loaded countries:", data);
-      setCountries(data || []);
-    } catch (error) {
-      console.error("Error loading countries:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadCities = useCallback(async (countryId: string) => {
-    try {
-      setCitiesLoading(true);
-      const { data, error } = await supabase
-        .from("cities")
-        .select("*")
-        .eq("country_id", countryId)
-        .eq("is_active", true)
-        .order("name_ar");
-
-      if (error) throw error;
-      console.log("Loaded cities for country", countryId, ":", data);
-      setCities(data || []);
-    } catch (error) {
-      console.error("Error loading cities:", error);
-    } finally {
-      setCitiesLoading(false);
-    }
-  }, []);
-
   const getLocalizedName = (item: Country | City) => {
-    switch (i18n.language) {
-      case "ar":
-        return item.name_ar;
-      case "fr":
-        return item.name_fr || item.name_en;
-      default:
-        return item.name_en;
-    }
+    const lang = i18n.language;
+    if (lang === "ar") return item.name_ar;
+    if (lang === "fr" && item.name_fr) return item.name_fr;
+    return item.name_en;
   };
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    console.log("Country selected:", value);
+    console.log("Country changed to:", value);
     onCountryChange(value);
     onCityChange(""); // Reset city when country changes
   };
 
   const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    console.log("City selected:", value);
+    console.log("City changed to:", value);
     onCityChange(value);
   };
 
@@ -132,18 +151,37 @@ const LocationSelector = ({
           <select
             value={selectedCountryId}
             onChange={handleCountryChange}
-            disabled={loading}
+            disabled={countriesLoading}
+            required={required}
             className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background pe-10 ps-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={t("common.selectCountry")}
           >
-            <option value="">{loading ? "جاري التحميل..." : t("common.selectCountry")}</option>
+            <option value="">
+              {countriesLoading ? (
+                "جاري تحميل الدول..."
+              ) : countriesError ? (
+                countriesError
+              ) : (
+                t("common.selectCountry")
+              )}
+            </option>
             {countries.map((country) => (
               <option key={country.id} value={country.id}>
                 {getLocalizedName(country)}
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+          <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {countriesLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin opacity-50" />
+            ) : (
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            )}
+          </div>
         </div>
+        {countriesError && (
+          <p className="text-sm text-destructive">{countriesError}</p>
+        )}
       </div>
 
       {/* City Selection */}
@@ -157,16 +195,22 @@ const LocationSelector = ({
             value={selectedCityId}
             onChange={handleCityChange}
             disabled={!selectedCountryId || citiesLoading}
+            required={required}
             className="flex h-10 w-full cursor-pointer appearance-none items-center rounded-md border border-input bg-background pe-10 ps-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            aria-label={t("common.selectCity")}
           >
             <option value="">
-              {!selectedCountryId
-                ? t("common.selectCountryFirst")
-                : citiesLoading
-                ? "جاري التحميل..."
-                : cities.length === 0
-                ? "لا توجد مدن متاحة"
-                : t("common.selectCity")}
+              {!selectedCountryId ? (
+                t("common.selectCountryFirst")
+              ) : citiesLoading ? (
+                "جاري تحميل المدن..."
+              ) : citiesError ? (
+                citiesError
+              ) : cities.length === 0 ? (
+                "لا توجد مدن متاحة"
+              ) : (
+                t("common.selectCity")
+              )}
             </option>
             {cities.map((city) => (
               <option key={city.id} value={city.id}>
@@ -174,8 +218,22 @@ const LocationSelector = ({
               </option>
             ))}
           </select>
-          <ChevronDown className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-50 pointer-events-none" />
+          <div className="absolute start-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {citiesLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin opacity-50" />
+            ) : (
+              <ChevronDown className="h-4 w-4 opacity-50" />
+            )}
+          </div>
         </div>
+        {citiesError && (
+          <p className="text-sm text-destructive">{citiesError}</p>
+        )}
+        {selectedCountryId && !citiesLoading && cities.length > 0 && (
+          <p className="text-xs text-muted-foreground">
+            {cities.length} مدينة متاحة
+          </p>
+        )}
       </div>
     </div>
   );
