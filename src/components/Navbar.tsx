@@ -25,6 +25,7 @@ const Navbar = () => {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [isHomeCook, setIsHomeCook] = useState(false);
+  const [isHouseWorker, setIsHouseWorker] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   
@@ -50,6 +51,7 @@ const Navbar = () => {
       } else {
         setProfile(null);
         setIsHomeCook(false);
+        setIsHouseWorker(false);
         setIsAdmin(false);
       }
     });
@@ -74,6 +76,14 @@ const Navbar = () => {
       .eq('user_id', userId)
       .maybeSingle();
     setIsHomeCook(!!cookData);
+
+    // Check if user is a house worker
+    const { data: workerData } = await supabase
+      .from('house_workers')
+      .select('id')
+      .eq('user_id', userId)
+      .maybeSingle();
+    setIsHouseWorker(!!workerData);
 
     // Check if user is admin using the secure function
     const { data: adminData } = await supabase.rpc('has_role', {
@@ -162,7 +172,16 @@ const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/cook-dashboard")}>
                         <ChefHat className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        {t("common.dashboard")}
+                        لوحة تحكم الطاهية
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  {isHouseWorker && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem onClick={() => navigate("/worker-dashboard")}>
+                        <HomeIcon className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                        لوحة تحكم العاملة
                       </DropdownMenuItem>
                     </>
                   )}
@@ -171,7 +190,7 @@ const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        {t("common.dashboard")}
+                        إدارة التطبيق
                       </DropdownMenuItem>
                     </>
                   )}
@@ -268,13 +287,22 @@ const Navbar = () => {
                     لوحة تحكم الطاهية
                   </Link>
                 )}
+                {isHouseWorker && (
+                  <Link
+                    to="/worker-dashboard"
+                    className="block py-2 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    لوحة تحكم العاملة
+                  </Link>
+                )}
                 {isAdmin && (
                   <Link
                     to="/admin"
                     className="block py-2 text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    لوحة التحكم
+                    إدارة التطبيق
                   </Link>
                 )}
                 <button

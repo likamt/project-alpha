@@ -50,7 +50,7 @@ const Profile = () => {
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) throw profileError;
 
@@ -239,7 +239,7 @@ const Profile = () => {
                           <Button
                             variant="outline"
                             className="w-full border-orange-500 text-orange-500 hover:bg-orange-50"
-                            onClick={() => navigate("/home-cook-dashboard")}
+                            onClick={() => navigate("/cook-dashboard")}
                           >
                             <ChefHat className="h-4 w-4 ml-2" />
                             لوحة الطاهية
@@ -250,7 +250,7 @@ const Profile = () => {
                           <Button
                             variant="outline"
                             className="w-full border-purple-500 text-purple-500 hover:bg-purple-50"
-                            onClick={() => navigate("/house-worker-dashboard")}
+                            onClick={() => navigate("/worker-dashboard")}
                           >
                             <Home className="h-4 w-4 ml-2" />
                             لوحة العاملة
