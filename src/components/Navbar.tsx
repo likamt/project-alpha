@@ -157,7 +157,7 @@ const Navbar = () => {
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/my-bookings")}>
                     <CalendarDays className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                    حجوزاتي
+                    {t("common.myBookings")}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/my-orders")}>
                     <Package className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
@@ -172,7 +172,7 @@ const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/cook-dashboard")}>
                         <ChefHat className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        لوحة تحكم الطاهية
+                        {t("common.cookDashboard")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -181,7 +181,7 @@ const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/worker-dashboard")}>
                         <HomeIcon className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        لوحة تحكم العاملة
+                        {t("common.workerDashboard")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -190,7 +190,7 @@ const Navbar = () => {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={() => navigate("/admin")}>
                         <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
-                        إدارة التطبيق
+                        {t("common.appManagement")}
                       </DropdownMenuItem>
                     </>
                   )}
@@ -214,13 +214,13 @@ const Navbar = () => {
                   variant="outline"
                   onClick={() => navigate("/join-house-worker")}
                 >
-                  انضمي كعاملة
+                  {t("common.joinAsWorker")}
                 </Button>
                 <Button 
                   className="bg-orange-500 hover:bg-orange-600"
                   onClick={() => navigate("/join-home-cook")}
                 >
-                  انضمي كطاهية
+                  {t("common.joinAsCook")}
                 </Button>
               </div>
             )}
@@ -255,28 +255,28 @@ const Navbar = () => {
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  الملف الشخصي
+                  {t("common.profile")}
                 </Link>
                 <Link
                   to="/my-bookings"
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  حجوزاتي
+                  {t("common.myBookings")}
                 </Link>
                 <Link
                   to="/my-orders"
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  طلباتي
+                  {t("common.orders")}
                 </Link>
                 <Link
                   to="/messages"
                   className="block py-2 text-foreground hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  الرسائل
+                  {t("common.messages")}
                 </Link>
                 {isHomeCook && (
                   <Link
@@ -284,7 +284,7 @@ const Navbar = () => {
                     className="block py-2 text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    لوحة تحكم الطاهية
+                    {t("common.cookDashboard")}
                   </Link>
                 )}
                 {isHouseWorker && (
@@ -293,7 +293,7 @@ const Navbar = () => {
                     className="block py-2 text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    لوحة تحكم العاملة
+                    {t("common.workerDashboard")}
                   </Link>
                 )}
                 {isAdmin && (
@@ -302,17 +302,17 @@ const Navbar = () => {
                     className="block py-2 text-foreground hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    إدارة التطبيق
+                    {t("common.appManagement")}
                   </Link>
                 )}
                 <button
-                  className="block w-full text-right py-2 text-destructive"
+                  className={`block w-full ${isRTL ? 'text-right' : 'text-left'} py-2 text-destructive`}
                   onClick={() => {
                     handleSignOut();
                     setIsOpen(false);
                   }}
                 >
-                  تسجيل الخروج
+                  {t("common.logout")}
                 </button>
               </>
             ) : (
@@ -325,7 +325,7 @@ const Navbar = () => {
                     setIsOpen(false);
                   }}
                 >
-                  تسجيل الدخول
+                  {t("common.login")}
                 </Button>
                 <Button 
                   variant="outline"
@@ -335,7 +335,7 @@ const Navbar = () => {
                     setIsOpen(false);
                   }}
                 >
-                  انضمي كعاملة
+                  {t("common.joinAsWorker")}
                 </Button>
                 <Button 
                   className="w-full bg-orange-500 hover:bg-orange-600"
@@ -344,7 +344,7 @@ const Navbar = () => {
                     setIsOpen(false);
                   }}
                 >
-                  انضمي كطاهية
+                  {t("common.joinAsCook")}
                 </Button>
               </>
             )}
