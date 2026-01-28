@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,17 +9,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { 
-  User, Mail, Phone, MapPin, Edit, Save, X, Shield, 
-  ChefHat, Home, MessageSquare, Loader2, Settings
+  User, Phone, MapPin, Edit, Save, X, Shield, 
+  ChefHat, Home, MessageSquare, Loader2, Settings, Camera
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ProfileImageUploader from "@/components/ProfileImageUploader";
 
 type AppRole = "admin" | "client" | "craftsman" | "house_worker" | "home_cook";
 
 const Profile = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === 'ar';
+  
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [profile, setProfile] = useState<any>(null);
@@ -38,8 +43,8 @@ const Profile = () => {
 
       if (!session) {
         toast({
-          title: "غير مصرح",
-          description: "يجب تسجيل الدخول أولاً",
+          title: t("common.error"),
+          description: t("auth.signInRequired") || "يجب تسجيل الدخول أولاً",
           variant: "destructive",
         });
         navigate("/auth");
@@ -61,13 +66,13 @@ const Profile = () => {
       setProfile(profileData);
       setUserRoles((rolesData as AppRole[]) || ["client"]);
       setFormData({
-        full_name: profileData.full_name || "",
-        phone: profileData.phone || "",
+        full_name: profileData?.full_name || "",
+        phone: profileData?.phone || "",
       });
     } catch (error: any) {
       console.error("Error loading profile:", error);
       toast({
-        title: "خطأ",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -96,12 +101,12 @@ const Profile = () => {
       setEditing(false);
 
       toast({
-        title: "تم الحفظ",
-        description: "تم تحديث الملف الشخصي بنجاح",
+        title: t("common.success"),
+        description: t("profile.saveChanges"),
       });
     } catch (error: any) {
       toast({
-        title: "خطأ في الحفظ",
+        title: t("common.error"),
         description: error.message,
         variant: "destructive",
       });
@@ -115,11 +120,11 @@ const Profile = () => {
 
   const getRoleLabel = (role: AppRole) => {
     const labels: Record<AppRole, string> = {
-      admin: "مدير",
-      client: "عميل",
+      admin: t("profile.adminPanel") || "مدير",
+      client: t("common.profile") || "عميل",
       craftsman: "حرفي",
-      house_worker: "عاملة منزلية",
-      home_cook: "طاهية منزلية",
+      house_worker: t("common.workerDashboard") || "عاملة منزلية",
+      home_cook: t("common.cookDashboard") || "طاهية منزلية",
     };
     return labels[role] || role;
   };
@@ -141,12 +146,12 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-subtle flex flex-col" dir="rtl">
+      <div className="min-h-screen bg-gradient-subtle flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
         <Navbar />
         <main className="flex-grow pt-24 flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto" />
-            <p className="mt-4 text-muted-foreground">جاري التحميل...</p>
+            <p className="mt-4 text-muted-foreground">{t("common.loading")}</p>
           </div>
         </main>
         <Footer />
@@ -156,12 +161,12 @@ const Profile = () => {
 
   if (!profile) {
     return (
-      <div className="min-h-screen bg-gradient-subtle flex flex-col" dir="rtl">
+      <div className="min-h-screen bg-gradient-subtle flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
         <Navbar />
         <main className="flex-grow pt-24 flex items-center justify-center">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">الملف الشخصي غير موجود</h2>
-            <Button onClick={() => navigate("/auth")}>تسجيل الدخول</Button>
+            <h2 className="text-2xl font-bold mb-4">{t("profile.profileNotFound")}</h2>
+            <Button onClick={() => navigate("/auth")}>{t("common.login")}</Button>
           </div>
         </main>
         <Footer />
@@ -170,21 +175,58 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-subtle flex flex-col" dir="rtl">
+    <div className="min-h-screen bg-gradient-subtle flex flex-col" dir={isRTL ? 'rtl' : 'ltr'}>
       <Navbar />
 
       <main className="flex-grow pt-24 pb-12">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* الشريط الجانبي */}
+            {/* Cover Image */}
+            <div className="relative h-48 md:h-64 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-t-xl overflow-hidden">
+              {profile.cover_url && (
+                <img 
+                  src={profile.cover_url} 
+                  alt="Cover" 
+                  className="w-full h-full object-cover"
+                />
+              )}
+              <ProfileImageUploader
+                currentImageUrl={profile.cover_url}
+                userId={profile.id}
+                type="cover"
+                onUploadComplete={(url) => setProfile((prev: any) => ({ ...prev, cover_url: url }))}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 -mt-16 relative z-10 px-4">
+              {/* Sidebar */}
               <div className="lg:col-span-1">
-                <Card className="animate-scale-in sticky top-24">
+                <Card className="animate-scale-in">
                   <CardContent className="p-6">
                     <div className="text-center">
-                      <div className="w-24 h-24 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="h-12 w-12 text-white" />
+                      {/* Profile Avatar */}
+                      <div className="relative inline-block">
+                        <div className="w-28 h-28 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden border-4 border-background">
+                          {profile.avatar_url ? (
+                            <img 
+                              src={profile.avatar_url} 
+                              alt={profile.full_name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <User className="h-14 w-14 text-white" />
+                          )}
+                        </div>
+                        <div className="absolute bottom-4 right-0">
+                          <ProfileImageUploader
+                            currentImageUrl={profile.avatar_url}
+                            userId={profile.id}
+                            type="avatar"
+                            onUploadComplete={(url) => setProfile((prev: any) => ({ ...prev, avatar_url: url }))}
+                          />
+                        </div>
                       </div>
+                      
                       <h2 className="text-xl font-bold mb-2">{profile.full_name}</h2>
                       <div className="flex flex-wrap justify-center gap-2 mb-4">
                         {userRoles.map((role) => (
@@ -197,11 +239,11 @@ const Profile = () => {
                       <div className="space-y-3 text-sm text-muted-foreground mt-6">
                         <div className="flex items-center gap-2 justify-center">
                           <Phone className="h-4 w-4" />
-                          <span>{profile.phone || "غير محدد"}</span>
+                          <span>{profile.phone || t("profile.notSpecified")}</span>
                         </div>
                         <div className="flex items-center gap-2 justify-center">
                           <MapPin className="h-4 w-4" />
-                          <span>المغرب</span>
+                          <span>{t("profile.location")}</span>
                         </div>
                       </div>
 
@@ -213,13 +255,13 @@ const Profile = () => {
                         >
                           {editing ? (
                             <>
-                              <X className="h-4 w-4 ml-2" />
-                              إلغاء
+                              <X className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              {t("profile.cancelEdit")}
                             </>
                           ) : (
                             <>
-                              <Edit className="h-4 w-4 ml-2" />
-                              تعديل الملف
+                              <Edit className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                              {t("profile.editProfile")}
                             </>
                           )}
                         </Button>
@@ -230,8 +272,8 @@ const Profile = () => {
                             className="w-full border-destructive text-destructive hover:bg-destructive/10"
                             onClick={() => navigate("/admin")}
                           >
-                            <Shield className="h-4 w-4 ml-2" />
-                            لوحة الإدارة
+                            <Shield className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {t("profile.adminPanel")}
                           </Button>
                         )}
 
@@ -241,8 +283,8 @@ const Profile = () => {
                             className="w-full border-orange-500 text-orange-500 hover:bg-orange-50"
                             onClick={() => navigate("/cook-dashboard")}
                           >
-                            <ChefHat className="h-4 w-4 ml-2" />
-                            لوحة الطاهية
+                            <ChefHat className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {t("profile.cookPanel")}
                           </Button>
                         )}
 
@@ -252,8 +294,8 @@ const Profile = () => {
                             className="w-full border-purple-500 text-purple-500 hover:bg-purple-50"
                             onClick={() => navigate("/worker-dashboard")}
                           >
-                            <Home className="h-4 w-4 ml-2" />
-                            لوحة العاملة
+                            <Home className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                            {t("profile.workerPanel")}
                           </Button>
                         )}
 
@@ -262,8 +304,8 @@ const Profile = () => {
                           className="w-full"
                           onClick={() => navigate("/messages")}
                         >
-                          <MessageSquare className="h-4 w-4 ml-2" />
-                          الرسائل
+                          <MessageSquare className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          {t("common.messages")}
                         </Button>
 
                         <Button
@@ -271,7 +313,7 @@ const Profile = () => {
                           className="w-full"
                           onClick={() => navigate("/my-orders")}
                         >
-                          طلباتي
+                          {t("common.orders")}
                         </Button>
 
                         <Button
@@ -279,7 +321,7 @@ const Profile = () => {
                           className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
                           onClick={handleSignOut}
                         >
-                          تسجيل الخروج
+                          {t("profile.signOut")}
                         </Button>
                       </div>
                     </div>
@@ -287,20 +329,20 @@ const Profile = () => {
                 </Card>
               </div>
 
-              {/* المحتوى الرئيسي */}
+              {/* Main Content */}
               <div className="lg:col-span-2 space-y-6">
                 <Card className="animate-fade-in">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Settings className="h-5 w-5" />
-                      معلومات الشخصية
+                      {t("profile.personalInfo")}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
                     {editing ? (
                       <>
                         <div className="space-y-2">
-                          <Label htmlFor="full_name">الاسم الكامل</Label>
+                          <Label htmlFor="full_name">{t("profile.fullName")}</Label>
                           <Input
                             id="full_name"
                             value={formData.full_name}
@@ -310,7 +352,7 @@ const Profile = () => {
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="phone">رقم الهاتف</Label>
+                          <Label htmlFor="phone">{t("profile.phone")}</Label>
                           <Input
                             id="phone"
                             value={formData.phone}
@@ -320,25 +362,25 @@ const Profile = () => {
                           />
                         </div>
                         <Button onClick={handleSaveProfile} className="w-full">
-                          <Save className="h-4 w-4 ml-2" />
-                          حفظ التغييرات
+                          <Save className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          {t("profile.saveChanges")}
                         </Button>
                       </>
                     ) : (
                       <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-4 bg-muted/50 rounded-lg">
-                            <Label className="text-muted-foreground text-xs">الاسم الكامل</Label>
+                            <Label className="text-muted-foreground text-xs">{t("profile.fullName")}</Label>
                             <p className="font-medium mt-1">{profile.full_name}</p>
                           </div>
                           <div className="p-4 bg-muted/50 rounded-lg">
-                            <Label className="text-muted-foreground text-xs">رقم الهاتف</Label>
-                            <p className="font-medium mt-1">{profile.phone || "غير محدد"}</p>
+                            <Label className="text-muted-foreground text-xs">{t("profile.phone")}</Label>
+                            <p className="font-medium mt-1">{profile.phone || t("profile.notSpecified")}</p>
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                           <div className="p-4 bg-muted/50 rounded-lg">
-                            <Label className="text-muted-foreground text-xs">الأدوار</Label>
+                            <Label className="text-muted-foreground text-xs">{t("profile.roles")}</Label>
                             <div className="flex flex-wrap gap-1 mt-2">
                               {userRoles.map((role) => (
                                 <Badge key={role} variant="outline" className="text-xs">
@@ -348,14 +390,14 @@ const Profile = () => {
                             </div>
                           </div>
                           <div className="p-4 bg-muted/50 rounded-lg">
-                            <Label className="text-muted-foreground text-xs">الباقة</Label>
+                            <Label className="text-muted-foreground text-xs">{t("profile.subscription")}</Label>
                             <p className="font-medium mt-1 capitalize">{profile.subscription_tier}</p>
                           </div>
                         </div>
                         <div className="p-4 bg-muted/50 rounded-lg">
-                          <Label className="text-muted-foreground text-xs">تاريخ الانضمام</Label>
+                          <Label className="text-muted-foreground text-xs">{t("profile.joinDate")}</Label>
                           <p className="font-medium mt-1">
-                            {new Date(profile.created_at).toLocaleDateString("ar-MA")}
+                            {new Date(profile.created_at).toLocaleDateString(isRTL ? "ar-MA" : "en-US")}
                           </p>
                         </div>
                       </div>
@@ -363,11 +405,11 @@ const Profile = () => {
                   </CardContent>
                 </Card>
 
-                {/* خيارات الانضمام كمقدم خدمة */}
+                {/* Join as Service Provider */}
                 {!isHouseWorker && !isHomeCook && (
                   <Card className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
                     <CardHeader>
-                      <CardTitle>انضمي كمقدمة خدمة</CardTitle>
+                      <CardTitle>{t("profile.joinAsProvider")}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -377,17 +419,17 @@ const Profile = () => {
                               <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center">
                                 <Home className="h-6 w-6 text-white" />
                               </div>
-                              <span className="font-semibold text-lg">عاملة منزلية</span>
+                              <span className="font-semibold text-lg">{t("common.workerDashboard")}</span>
                             </div>
                             <p className="text-sm text-muted-foreground mb-4">
-                              قدمي خدمات التنظيف والعناية بالمنزل
+                              {t("profile.workerDescription")}
                             </p>
                             <Button 
                               variant="outline" 
                               className="w-full border-purple-500 text-purple-500 hover:bg-purple-50"
                               onClick={() => navigate("/join-house-worker")}
                             >
-                              انضمي الآن
+                              {t("profile.joinNow")}
                             </Button>
                           </div>
                         )}
@@ -398,17 +440,17 @@ const Profile = () => {
                               <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center">
                                 <ChefHat className="h-6 w-6 text-white" />
                               </div>
-                              <span className="font-semibold text-lg">طاهية منزلية</span>
+                              <span className="font-semibold text-lg">{t("common.cookDashboard")}</span>
                             </div>
                             <p className="text-sm text-muted-foreground mb-4">
-                              شاركي وصفاتك اللذيذة واكسبي دخلاً إضافياً
+                              {t("profile.cookDescription")}
                             </p>
                             <Button 
                               variant="outline" 
                               className="w-full border-orange-500 text-orange-500 hover:bg-orange-50"
                               onClick={() => navigate("/join-home-cook")}
                             >
-                              انضمي الآن
+                              {t("profile.joinNow")}
                             </Button>
                           </div>
                         )}
