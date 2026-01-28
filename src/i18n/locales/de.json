@@ -81,7 +81,11 @@
     "joinNow": "Jetzt beitreten",
     "workerDescription": "Biete Reinigungs- und Hauswirtschaftsdienste an",
     "cookDescription": "Teile deine leckeren Rezepte und verdiene extra",
-    "location": "Marokko"
+    "location": "Marokko",
+    "changePassword": "Passwort ändern",
+    "passwordChanged": "Passwort geändert",
+    "passwordChangedDescription": "Ihr Passwort wurde erfolgreich geändert",
+    "changePasswordDescription": "Geben Sie Ihr neues Passwort ein"
   },
   "task": {
     "confirmCompletion": "Aufgabe abgeschlossen",

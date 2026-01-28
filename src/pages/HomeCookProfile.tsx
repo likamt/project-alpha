@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ContactDialog from "@/components/ContactDialog";
+import OrderDialog from "@/components/OrderDialog";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import {
   Star, Clock, Users, ChefHat, MapPin, ShoppingCart, 
   CheckCircle, Phone, MessageSquare, ArrowRight, ImageIcon
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 
 interface HomeCook {
   id: string;
@@ -77,7 +77,8 @@ const HomeCookProfile = () => {
   const [loading, setLoading] = useState(true);
   const [contactOpen, setContactOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [orderDialogOpen, setOrderDialogOpen] = useState(false);
+  const [selectedDish, setSelectedDish] = useState<FoodDish | null>(null);
 
   useEffect(() => {
     if (id) {
@@ -124,10 +125,8 @@ const HomeCookProfile = () => {
   };
 
   const handleOrder = (dish: FoodDish) => {
-    toast({
-      title: "قريباً!",
-      description: `سيتم تفعيل خدمة الطلب قريباً. طبق: ${dish.name}`,
-    });
+    setSelectedDish(dish);
+    setOrderDialogOpen(true);
   };
 
   if (loading) {
@@ -419,6 +418,19 @@ const HomeCookProfile = () => {
           recipientName={cook.profile?.full_name || "الطاهية"}
         />
       )}
+
+      {/* Order Dialog */}
+      <OrderDialog
+        open={orderDialogOpen}
+        onOpenChange={setOrderDialogOpen}
+        dish={selectedDish ? {
+          id: selectedDish.id,
+          name: selectedDish.name,
+          price: selectedDish.price,
+          preparation_time_minutes: selectedDish.preparation_time_minutes,
+          cook_id: cook?.id || "",
+        } : null}
+      />
 
       {/* Image Lightbox */}
       {selectedImage && (
