@@ -83,8 +83,8 @@ const OrderDialog = ({ open, onOpenChange, dish }: OrderDialogProps) => {
 
     setLoading(true);
     try {
-      // إنشاء الطلب مباشرة بدون Stripe
-      const { error } = await supabase.from("food_orders").insert({
+      // إنشاء الطلب
+      const { data: orderData, error: orderError } = await supabase.from("food_orders").insert({
         client_id: user.id,
         cook_id: dish.cook_id,
         dish_id: dish.id,
@@ -99,25 +99,35 @@ const OrderDialog = ({ open, onOpenChange, dish }: OrderDialogProps) => {
         city_id: selectedCityId,
         status: "pending",
         payment_status: "cash_pending",
-      });
+      }).select().single();
 
-      if (error) throw error;
+      if (orderError) {
+        console.error("Order creation error:", orderError);
+        throw orderError;
+      }
 
-      // إرسال إشعار للطباخة
-      const { data: cookData } = await supabase
-        .from("home_cooks")
-        .select("user_id")
-        .eq("id", dish.cook_id)
-        .single();
+      // إرسال إشعار للطباخة (استخدام edge function)
+      try {
+        const { data: cookData } = await supabase
+          .from("home_cooks")
+          .select("user_id")
+          .eq("id", dish.cook_id)
+          .single();
 
-      if (cookData) {
-        await supabase.from("notifications").insert({
-          user_id: cookData.user_id,
-          title: t("orders.newOrder"),
-          message: `${t("orders.newOrderFor")} ${dish.name} - ${t("orders.quantity")}: ${quantity}`,
-          type: "order",
-          link: "/cook-dashboard",
-        });
+        if (cookData) {
+          await supabase.functions.invoke("send-notification", {
+            body: {
+              recipientId: cookData.user_id,
+              type: "new_order",
+              title: t("orders.newOrder"),
+              message: `${t("orders.newOrderFor")} ${dish.name} - ${t("orders.quantity")}: ${quantity}`,
+              link: "/cook-dashboard",
+            },
+          });
+        }
+      } catch (notifError) {
+        console.log("Notification not sent:", notifError);
+        // لا نريد فشل الطلب إذا فشل إرسال الإشعار
       }
 
       setSuccess(true);
