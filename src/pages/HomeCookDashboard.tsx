@@ -16,12 +16,13 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { 
   ChefHat, Plus, Edit, Trash2, Star, Clock, Users, 
   ShoppingCart, MessageSquare, Loader2, DollarSign, 
-  CheckCircle, Package, AlertCircle, ImageIcon, Crown
+  CheckCircle, Package, AlertCircle, ImageIcon, Crown, User
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PortfolioUploader from "@/components/PortfolioUploader";
 import MultiDishImageUploader from "@/components/MultiDishImageUploader";
 import SubscriptionCard from "@/components/SubscriptionCard";
+import ProfileEditForm from "@/components/dashboard/ProfileEditForm";
 import { useTranslation } from "react-i18next";
 
 interface FoodDish {
@@ -646,27 +647,31 @@ const HomeCookDashboard = () => {
 
           {/* Main Content */}
           <Tabs defaultValue="subscription" className="space-y-6">
-            <TabsList className="grid w-full max-w-2xl grid-cols-5">
+            <TabsList className="grid w-full max-w-3xl grid-cols-6">
               <TabsTrigger value="subscription" className="flex items-center gap-1">
                 <Crown className="h-4 w-4" />
-                الاشتراك
+                {t("cookDashboard.subscription")}
               </TabsTrigger>
               <TabsTrigger value="orders">
-                الطلبات
+                {t("cookDashboard.orders")}
                 {activeOrders.length > 0 && (
                   <Badge className="mr-2 bg-orange-500">{activeOrders.length}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="dishes">الأطباق</TabsTrigger>
+              <TabsTrigger value="dishes">{t("cookDashboard.dishes")}</TabsTrigger>
               <TabsTrigger value="portfolio">
                 <ImageIcon className="h-4 w-4 ml-1" />
-                معرض
+                {t("cookDashboard.portfolio")}
               </TabsTrigger>
               <TabsTrigger value="messages">
-                رسائل
+                {t("cookDashboard.messages")}
                 {stats.unreadMessages > 0 && (
                   <Badge className="mr-2 bg-red-500">{stats.unreadMessages}</Badge>
                 )}
+              </TabsTrigger>
+              <TabsTrigger value="edit" className="flex items-center gap-1">
+                <User className="h-4 w-4" />
+                {t("common.edit")}
               </TabsTrigger>
             </TabsList>
 
@@ -911,8 +916,8 @@ const HomeCookDashboard = () => {
                 <Card>
                   <CardContent className="py-12 text-center">
                     <MessageSquare className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">لا توجد رسائل</h3>
-                    <p className="text-muted-foreground">ستظهر هنا الرسائل من العملاء</p>
+                    <h3 className="text-xl font-semibold mb-2">{t("dashboard.noMessages")}</h3>
+                    <p className="text-muted-foreground">{t("cookDashboard.ordersWillAppear")}</p>
                   </CardContent>
                 </Card>
               ) : (
@@ -926,20 +931,31 @@ const HomeCookDashboard = () => {
                       <CardContent className="py-4">
                         <div className="flex justify-between items-start">
                           <div>
-                            <p className="font-semibold">{msg.sender?.full_name || "مستخدم"}</p>
+                            <p className="font-semibold">{msg.sender?.full_name || t("common.user")}</p>
                             <p className="text-muted-foreground mt-1">{msg.content}</p>
                           </div>
                           <div className="text-left">
                             <p className="text-xs text-muted-foreground">
                               {msg.created_at ? new Date(msg.created_at).toLocaleDateString("ar-MA") : ""}
                             </p>
-                            {!msg.is_read && <Badge className="mt-1 bg-orange-500">جديد</Badge>}
+                            {!msg.is_read && <Badge className="mt-1 bg-orange-500">{t("notifications.new")}</Badge>}
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="edit">
+              {user && cookProfile && (
+                <ProfileEditForm
+                  type="home_cook"
+                  profile={cookProfile}
+                  userId={user.id}
+                  onProfileUpdate={(updatedProfile) => setCookProfile(updatedProfile)}
+                />
               )}
             </TabsContent>
           </Tabs>
