@@ -10,11 +10,12 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { 
   User, Phone, MapPin, Edit, Save, X, Shield, 
-  ChefHat, Home, MessageSquare, Loader2, Settings, Camera
+  ChefHat, Home, MessageSquare, Loader2, Settings, Camera, Lock
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProfileImageUploader from "@/components/ProfileImageUploader";
+import PasswordChangeDialog from "@/components/PasswordChangeDialog";
 
 type AppRole = "admin" | "client" | "craftsman" | "house_worker" | "home_cook";
 
@@ -26,6 +27,7 @@ const Profile = () => {
   
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [userRoles, setUserRoles] = useState<AppRole[]>([]);
   const [formData, setFormData] = useState({
@@ -318,6 +320,15 @@ const Profile = () => {
 
                         <Button
                           variant="outline"
+                          className="w-full"
+                          onClick={() => setPasswordDialogOpen(true)}
+                        >
+                          <Lock className={`h-4 w-4 ${isRTL ? 'ml-2' : 'mr-2'}`} />
+                          {t("profile.changePassword")}
+                        </Button>
+
+                        <Button
+                          variant="outline"
                           className="w-full text-destructive hover:bg-destructive/10 hover:text-destructive"
                           onClick={handleSignOut}
                         >
@@ -465,6 +476,11 @@ const Profile = () => {
       </main>
 
       <Footer />
+
+      <PasswordChangeDialog 
+        open={passwordDialogOpen} 
+        onOpenChange={setPasswordDialogOpen} 
+      />
     </div>
   );
 };

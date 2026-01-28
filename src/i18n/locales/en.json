@@ -81,7 +81,11 @@
     "joinNow": "Join Now",
     "workerDescription": "Offer cleaning and home care services",
     "cookDescription": "Share your delicious recipes and earn extra income",
-    "location": "Morocco"
+    "location": "Morocco",
+    "changePassword": "Change Password",
+    "passwordChanged": "Password Changed",
+    "passwordChangedDescription": "Your password has been changed successfully",
+    "changePasswordDescription": "Enter your new password"
   },
   "task": {
     "confirmCompletion": "Task completed",

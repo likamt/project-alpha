@@ -81,7 +81,11 @@
     "joinNow": "Rejoindre maintenant",
     "workerDescription": "Offrez des services de nettoyage et d'entretien",
     "cookDescription": "Partagez vos recettes délicieuses et gagnez un revenu supplémentaire",
-    "location": "Maroc"
+    "location": "Maroc",
+    "changePassword": "Changer le mot de passe",
+    "passwordChanged": "Mot de passe changé",
+    "passwordChangedDescription": "Votre mot de passe a été changé avec succès",
+    "changePasswordDescription": "Entrez votre nouveau mot de passe"
   },
   "task": {
     "confirmCompletion": "Tâche terminée",

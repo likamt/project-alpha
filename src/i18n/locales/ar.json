@@ -81,7 +81,11 @@
     "joinNow": "انضمي الآن",
     "workerDescription": "قدمي خدمات التنظيف والعناية بالمنزل",
     "cookDescription": "شاركي وصفاتك اللذيذة واكسبي دخلاً إضافياً",
-    "location": "المغرب"
+    "location": "المغرب",
+    "changePassword": "تغيير كلمة المرور",
+    "passwordChanged": "تم تغيير كلمة المرور",
+    "passwordChangedDescription": "تم تغيير كلمة المرور الخاصة بك بنجاح",
+    "changePasswordDescription": "أدخل كلمة المرور الجديدة"
   },
   "task": {
     "confirmCompletion": "تم إنجاز المهمة",

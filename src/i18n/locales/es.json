@@ -81,7 +81,11 @@
     "joinNow": "Unirse ahora",
     "workerDescription": "Ofrece servicios de limpieza y cuidado del hogar",
     "cookDescription": "Comparte tus deliciosas recetas y gana ingresos extra",
-    "location": "Marruecos"
+    "location": "Marruecos",
+    "changePassword": "Cambiar contraseña",
+    "passwordChanged": "Contraseña cambiada",
+    "passwordChangedDescription": "Tu contraseña ha sido cambiada con éxito",
+    "changePasswordDescription": "Ingresa tu nueva contraseña"
   },
   "task": {
     "confirmCompletion": "Tarea completada",
