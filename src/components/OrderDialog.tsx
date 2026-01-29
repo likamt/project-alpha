@@ -98,7 +98,7 @@ const OrderDialog = ({ open, onOpenChange, dish }: OrderDialogProps) => {
         country_id: selectedCountryId,
         city_id: selectedCityId,
         status: "pending",
-        payment_status: "cash_pending",
+        payment_status: "pending",
       }).select().single();
 
       if (orderError) {
