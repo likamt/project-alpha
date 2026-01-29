@@ -457,13 +457,14 @@ const HomeCookDashboard = () => {
 
   const activeOrders = orders.filter(o => !["completed", "cancelled"].includes(o.status));
   const statusLabels: Record<string, { label: string; color: string }> = {
-    pending: { label: "في انتظار الدفع", color: "bg-yellow-500" },
+    pending: { label: "في انتظار القبول", color: "bg-yellow-500" },
     paid: { label: "تم الدفع", color: "bg-blue-500" },
     preparing: { label: "جاري التحضير", color: "bg-orange-500" },
     ready: { label: "جاهز للتسليم", color: "bg-purple-500" },
     delivered: { label: "تم التوصيل", color: "bg-green-500" },
     completed: { label: "مكتمل", color: "bg-green-600" },
     cancelled: { label: "ملغي", color: "bg-red-500" },
+    disputed: { label: "متنازع عليه", color: "bg-gray-500" },
   };
 
   const stats = {
@@ -718,8 +719,8 @@ const HomeCookDashboard = () => {
                             <div className="flex gap-2 mb-4">
                               <Button 
                                 size="sm" 
-                                onClick={() => updateOrderStatus(order.id, "accepted")}
-                                className="bg-blue-500 hover:bg-blue-600"
+                                onClick={() => updateOrderStatus(order.id, "preparing")}
+                                className="bg-green-500 hover:bg-green-600"
                               >
                                 قبول الطلب
                               </Button>
@@ -733,14 +734,14 @@ const HomeCookDashboard = () => {
                             </div>
                           )}
                           
-                          {order.status === "accepted" && (
+                          {order.status === "preparing" && (
                             <div className="flex gap-2 mb-4">
                               <Button 
                                 size="sm" 
-                                onClick={() => updateOrderStatus(order.id, "preparing")}
-                                className="bg-orange-500 hover:bg-orange-600"
+                                onClick={() => updateOrderStatus(order.id, "ready")}
+                                className="bg-purple-500 hover:bg-purple-600"
                               >
-                                بدء التحضير
+                                جاهز للتسليم
                               </Button>
                             </div>
                           )}
@@ -770,7 +771,7 @@ const HomeCookDashboard = () => {
                           )}
                           
                           {/* Cash payment notice */}
-                          {order.payment_status === "cash_pending" && (
+                          {order.payment_status === "pending" && (
                             <div className="p-2 bg-orange-50 rounded text-xs text-orange-700 flex items-center gap-2 mb-3">
                               <AlertCircle className="h-4 w-4" />
                               الدفع نقداً عند الاستلام
