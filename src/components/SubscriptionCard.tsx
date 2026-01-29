@@ -66,8 +66,15 @@ const SubscriptionCard = ({ providerType }: SubscriptionCardProps) => {
 
       if (error) throw error;
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (data?.url) {
+        // فتح صفحة Stripe في نافذة جديدة لتجنب الشاشة البيضاء
+        window.open(data.url, "_blank");
+        toast({
+          title: "تم فتح صفحة الدفع",
+          description: "يرجى إكمال عملية الاشتراك في النافذة الجديدة",
+        });
+      } else if (data?.error) {
+        throw new Error(data.error);
       }
     } catch (error: any) {
       toast({
