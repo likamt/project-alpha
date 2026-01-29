@@ -94,7 +94,7 @@ const MyOrders = () => {
         .update({
           client_confirmed_at: new Date().toISOString(),
           status: "completed",
-          payment_status: "cash_paid",
+          payment_status: "paid",
         })
         .eq("id", orderId);
 
