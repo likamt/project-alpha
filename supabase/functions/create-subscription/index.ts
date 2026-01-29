@@ -82,7 +82,12 @@ serve(async (req) => {
       );
     }
 
+    // Get origin from headers or use default
+    const origin = req.headers.get("origin") || req.headers.get("referer")?.split("/").slice(0, 3).join("/") || "https://pro-hub-core.lovable.app";
+    logStep("Origin", { origin });
+
     // Create checkout session with 30-day free trial
+    const dashboardPath = provider_type === "home_cook" ? "cook-dashboard" : "worker-dashboard";
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [{ price: priceId, quantity: 1 }],
@@ -94,8 +99,8 @@ serve(async (req) => {
           user_id: user.id,
         },
       },
-      success_url: `${req.headers.get("origin")}/${provider_type === "home_cook" ? "cook-dashboard" : "worker-dashboard"}?subscription=success`,
-      cancel_url: `${req.headers.get("origin")}/${provider_type === "home_cook" ? "cook-dashboard" : "worker-dashboard"}?subscription=cancelled`,
+      success_url: `${origin}/${dashboardPath}?subscription=success`,
+      cancel_url: `${origin}/${dashboardPath}?subscription=cancelled`,
       metadata: {
         provider_type,
         user_id: user.id,
