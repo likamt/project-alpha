@@ -9,9 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Package, Clock, CheckCircle, XCircle, Loader2, 
-  ChefHat, AlertCircle, Receipt
+  ChefHat, AlertCircle, Receipt, Star
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import RatingDialog from "@/components/RatingDialog";
 
 interface Order {
   id: string;
@@ -23,6 +24,7 @@ interface Order {
   delivery_address: string | null;
   client_confirmed_at: string | null;
   created_at: string | null;
+  cook_id: string;
   dish: {
     name: string;
     image_url: string | null;
@@ -50,6 +52,9 @@ const MyOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState<string | null>(null);
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [orderToRate, setOrderToRate] = useState<Order | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   useEffect(() => {
     checkAuthAndLoadOrders();
@@ -61,6 +66,7 @@ const MyOrders = () => {
       navigate("/auth");
       return;
     }
+    setCurrentUserId(user.id);
     await loadOrders(user.id);
   };
 
@@ -85,10 +91,9 @@ const MyOrders = () => {
     }
   };
 
-  const confirmDelivery = async (orderId: string) => {
-    setConfirming(orderId);
+  const confirmDelivery = async (order: Order) => {
+    setConfirming(order.id);
     try {
-      // تحديث الطلب مباشرة - الزبون يؤكد الاستلام
       const { error } = await supabase
         .from("food_orders")
         .update({
@@ -96,18 +101,16 @@ const MyOrders = () => {
           status: "completed",
           payment_status: "paid",
         })
-        .eq("id", orderId);
+        .eq("id", order.id);
 
       if (error) throw error;
 
-      toast({
-        title: "تم تأكيد الاستلام!",
-        description: "شكراً لك! تم إكمال الطلب بنجاح.",
-      });
+      // فتح نافذة التقييم بعد تأكيد الاستلام
+      setOrderToRate(order);
+      setRatingDialogOpen(true);
 
       // Reload orders
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) await loadOrders(user.id);
+      if (currentUserId) await loadOrders(currentUserId);
     } catch (error: any) {
       toast({
         title: "خطأ",
@@ -116,6 +119,34 @@ const MyOrders = () => {
       });
     } finally {
       setConfirming(null);
+    }
+  };
+
+  const handleRatingSubmit = async (rating: number, comment: string) => {
+    if (!orderToRate || !currentUserId) return;
+
+    try {
+      const { error } = await supabase.from("food_ratings").insert({
+        order_id: orderToRate.id,
+        cook_id: orderToRate.cook_id,
+        client_id: currentUserId,
+        rating: rating,
+        comment: comment || null,
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "شكراً لك!",
+        description: "تم إرسال تقييمك بنجاح",
+      });
+    } catch (error: any) {
+      console.error("Error submitting rating:", error);
+      toast({
+        title: "خطأ",
+        description: "فشل في إرسال التقييم",
+        variant: "destructive",
+      });
     }
   };
 
@@ -179,7 +210,7 @@ const MyOrders = () => {
               {/* Confirm button */}
               {canConfirm && (
                 <Button 
-                  onClick={() => confirmDelivery(order.id)}
+                  onClick={() => confirmDelivery(order)}
                   disabled={confirming === order.id}
                   className="mt-3 bg-green-600 hover:bg-green-700"
                   size="sm"
@@ -261,6 +292,18 @@ const MyOrders = () => {
           )}
         </div>
       </main>
+
+      {/* Rating Dialog */}
+      <RatingDialog
+        open={ratingDialogOpen}
+        onClose={() => {
+          setRatingDialogOpen(false);
+          setOrderToRate(null);
+        }}
+        onSubmit={handleRatingSubmit}
+        title="قيّم الطاهية"
+        description={`كيف كانت تجربتك مع ${orderToRate?.cook?.profile?.full_name || "الطاهية"}؟`}
+      />
 
       <Footer />
     </div>
