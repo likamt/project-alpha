@@ -30,6 +30,7 @@ interface Order {
     image_url: string | null;
   } | null;
   cook: {
+    id: string;
     profile: {
       full_name: string;
     } | null;
@@ -77,13 +78,20 @@ const MyOrders = () => {
         .select(`
           *,
           dish:food_dishes(name, image_url),
-          cook:home_cooks(profile:profiles(full_name))
+          cook:home_cooks(id, profile:profiles(full_name))
         `)
         .eq("client_id", userId)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setOrders(data || []);
+      
+      // Map cook.id to cook_id for orders that don't have cook_id set
+      const ordersWithCookId = (data || []).map(order => ({
+        ...order,
+        cook_id: order.cook_id || order.cook?.id
+      }));
+      
+      setOrders(ordersWithCookId);
     } catch (error) {
       console.error("Error loading orders:", error);
     } finally {
@@ -122,13 +130,25 @@ const MyOrders = () => {
     }
   };
 
-  const handleRatingSubmit = async (rating: number, comment: string) => {
+  const handleRatingSubmit = async (rating: number, comment: string): Promise<void> => {
     if (!orderToRate || !currentUserId) return;
+
+    // Get cook_id from the order - use cook.id if cook_id is not set
+    const cookId = orderToRate.cook_id || orderToRate.cook?.id;
+    
+    if (!cookId) {
+      toast({
+        title: "خطأ",
+        description: "لم يتم العثور على معلومات الطاهية",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       const { error } = await supabase.from("food_ratings").insert({
         order_id: orderToRate.id,
-        cook_id: orderToRate.cook_id,
+        cook_id: cookId,
         client_id: currentUserId,
         rating: rating,
         comment: comment || null,
@@ -144,9 +164,10 @@ const MyOrders = () => {
       console.error("Error submitting rating:", error);
       toast({
         title: "خطأ",
-        description: "فشل في إرسال التقييم",
+        description: error.message || "فشل في إرسال التقييم",
         variant: "destructive",
       });
+      throw error; // Re-throw to let RatingDialog know it failed
     }
   };
 
@@ -200,7 +221,7 @@ const MyOrders = () => {
               </div>
 
               {/* Cash payment status */}
-              {order.payment_status === "cash_pending" && (
+              {order.payment_status === "pending" && (
                 <div className="mt-3 p-2 bg-orange-50 rounded text-xs text-orange-700 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
                   الدفع نقداً عند الاستلام
