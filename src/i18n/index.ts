@@ -53,12 +53,14 @@ i18n.on('languageChanged', (lng) => {
 document.documentElement.dir = getSavedLanguage() === 'ar' ? 'rtl' : 'ltr';
 document.documentElement.lang = getSavedLanguage();
 
-export default i18n;
-
-export const languages = [
+// Language definitions
+const languageList = [
   { code: 'ar', name: 'العربية', flag: '🇲🇦', dir: 'rtl' },
   { code: 'fr', name: 'Français', flag: '🇫🇷', dir: 'ltr' },
   { code: 'en', name: 'English', flag: '🇬🇧', dir: 'ltr' },
   { code: 'es', name: 'Español', flag: '🇪🇸', dir: 'ltr' },
   { code: 'de', name: 'Deutsch', flag: '🇩🇪', dir: 'ltr' },
 ];
+
+export const languages = languageList;
+export default i18n;
