@@ -555,5 +555,34 @@
     "noDescription": "Keine Beschreibung",
     "notSpecified": "Nicht angegeben",
     "verifiedAccount": "Verifiziertes Konto"
+  },
+  "myOrders": {
+    "title": "Meine Bestellungen",
+    "noOrders": "Keine Bestellungen",
+    "noOrdersYet": "Sie haben noch keine Bestellungen aufgegeben",
+    "browseDishes": "Gerichte durchsuchen",
+    "active": "Aktiv",
+    "completed": "Abgeschlossen",
+    "noActiveOrders": "Keine aktiven Bestellungen",
+    "noCompletedOrders": "Keine abgeschlossenen Bestellungen",
+    "confirmReceiptAndPayment": "Empfang und Zahlung bestätigen",
+    "orderCompletedSuccessfully": "Bestellung erfolgreich abgeschlossen",
+    "rateCook": "Köchin bewerten",
+    "rateExperience": "Wie war Ihre Erfahrung mit {{name}}?",
+    "theCook": "der Köchin",
+    "thankYou": "Danke!",
+    "ratingSubmitted": "Ihre Bewertung wurde erfolgreich gesendet",
+    "ratingError": "Fehler beim Senden der Bewertung",
+    "confirmError": "Ein Fehler ist bei der Bestätigung aufgetreten",
+    "cookNotFound": "Köchin-Informationen nicht gefunden",
+    "status": {
+      "pending": "Ausstehende Annahme",
+      "accepted": "Angenommen",
+      "preparing": "In Vorbereitung",
+      "ready": "Bereit zur Lieferung",
+      "delivered": "Geliefert",
+      "completed": "Abgeschlossen",
+      "cancelled": "Storniert"
+    }
   }
 }

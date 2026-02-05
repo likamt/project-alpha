@@ -555,5 +555,34 @@
     "noDescription": "لا يوجد وصف",
     "notSpecified": "غير محدد",
     "verifiedAccount": "حساب موثق"
+  },
+  "myOrders": {
+    "title": "طلباتي",
+    "noOrders": "لا توجد طلبات",
+    "noOrdersYet": "لم تقم بأي طلبات بعد",
+    "browseDishes": "تصفح الأطباق",
+    "active": "نشطة",
+    "completed": "مكتملة",
+    "noActiveOrders": "لا توجد طلبات نشطة",
+    "noCompletedOrders": "لا توجد طلبات مكتملة",
+    "confirmReceiptAndPayment": "تأكيد الاستلام والدفع",
+    "orderCompletedSuccessfully": "تم إكمال الطلب بنجاح",
+    "rateCook": "قيّم الطاهية",
+    "rateExperience": "كيف كانت تجربتك مع {{name}}؟",
+    "theCook": "الطاهية",
+    "thankYou": "شكراً لك!",
+    "ratingSubmitted": "تم إرسال تقييمك بنجاح",
+    "ratingError": "فشل في إرسال التقييم",
+    "confirmError": "حدث خطأ أثناء التأكيد",
+    "cookNotFound": "لم يتم العثور على معلومات الطاهية",
+    "status": {
+      "pending": "في انتظار القبول",
+      "accepted": "تم القبول",
+      "preparing": "جاري التحضير",
+      "ready": "جاهز للتسليم",
+      "delivered": "تم التوصيل",
+      "completed": "مكتمل",
+      "cancelled": "ملغي"
+    }
   }
 }

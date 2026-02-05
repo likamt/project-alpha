@@ -555,5 +555,34 @@
     "noDescription": "Sin descripción",
     "notSpecified": "No especificado",
     "verifiedAccount": "Cuenta verificada"
+  },
+  "myOrders": {
+    "title": "Mis Pedidos",
+    "noOrders": "Sin pedidos",
+    "noOrdersYet": "Aún no has realizado ningún pedido",
+    "browseDishes": "Explorar platos",
+    "active": "Activos",
+    "completed": "Completados",
+    "noActiveOrders": "Sin pedidos activos",
+    "noCompletedOrders": "Sin pedidos completados",
+    "confirmReceiptAndPayment": "Confirmar recepción y pago",
+    "orderCompletedSuccessfully": "Pedido completado con éxito",
+    "rateCook": "Evaluar a la cocinera",
+    "rateExperience": "¿Cómo fue tu experiencia con {{name}}?",
+    "theCook": "la cocinera",
+    "thankYou": "¡Gracias!",
+    "ratingSubmitted": "Tu valoración fue enviada exitosamente",
+    "ratingError": "Error al enviar la valoración",
+    "confirmError": "Ocurrió un error durante la confirmación",
+    "cookNotFound": "Información de la cocinera no encontrada",
+    "status": {
+      "pending": "Pendiente de aceptación",
+      "accepted": "Aceptado",
+      "preparing": "En preparación",
+      "ready": "Listo para entrega",
+      "delivered": "Entregado",
+      "completed": "Completado",
+      "cancelled": "Cancelado"
+    }
   }
 }
