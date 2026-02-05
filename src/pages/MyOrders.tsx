@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { useTranslation } from "react-i18next";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -37,19 +38,20 @@ interface Order {
   } | null;
 }
 
-const statusLabels: Record<string, { label: string; color: string }> = {
-  pending: { label: "في انتظار القبول", color: "bg-yellow-500" },
-  accepted: { label: "تم القبول", color: "bg-blue-500" },
-  preparing: { label: "جاري التحضير", color: "bg-orange-500" },
-  ready: { label: "جاهز للتسليم", color: "bg-purple-500" },
-  delivered: { label: "تم التوصيل", color: "bg-green-500" },
-  completed: { label: "مكتمل", color: "bg-green-600" },
-  cancelled: { label: "ملغي", color: "bg-red-500" },
+const statusColors: Record<string, string> = {
+  pending: "bg-yellow-500",
+  accepted: "bg-blue-500",
+  preparing: "bg-orange-500",
+  ready: "bg-purple-500",
+  delivered: "bg-green-500",
+  completed: "bg-green-600",
+  cancelled: "bg-red-500",
 };
 
 const MyOrders = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirming, setConfirming] = useState<string | null>(null);
@@ -121,8 +123,8 @@ const MyOrders = () => {
       if (currentUserId) await loadOrders(currentUserId);
     } catch (error: any) {
       toast({
-        title: "خطأ",
-        description: error.message,
+        title: t('common.error'),
+        description: error.message || t('myOrders.confirmError'),
         variant: "destructive",
       });
     } finally {
@@ -138,8 +140,8 @@ const MyOrders = () => {
     
     if (!cookId) {
       toast({
-        title: "خطأ",
-        description: "لم يتم العثور على معلومات الطاهية",
+        title: t('common.error'),
+        description: t('myOrders.cookNotFound'),
         variant: "destructive",
       });
       return;
@@ -157,14 +159,14 @@ const MyOrders = () => {
       if (error) throw error;
 
       toast({
-        title: "شكراً لك!",
-        description: "تم إرسال تقييمك بنجاح",
+        title: t('myOrders.thankYou'),
+        description: t('myOrders.ratingSubmitted'),
       });
     } catch (error: any) {
       console.error("Error submitting rating:", error);
       toast({
-        title: "خطأ",
-        description: error.message || "فشل في إرسال التقييم",
+        title: t('common.error'),
+        description: error.message || t('myOrders.ratingError'),
         variant: "destructive",
       });
       throw error; // Re-throw to let RatingDialog know it failed
@@ -187,7 +189,8 @@ const MyOrders = () => {
   }
 
   const OrderCard = ({ order }: { order: Order }) => {
-    const status = statusLabels[order.status] || { label: order.status, color: "bg-gray-500" };
+    const statusColor = statusColors[order.status] || "bg-gray-500";
+    const statusLabel = t(`myOrders.status.${order.status}`, order.status);
     const canConfirm = ["delivered", "ready"].includes(order.status) && !order.client_confirmed_at;
 
     return (
@@ -207,14 +210,14 @@ const MyOrders = () => {
                 <div>
                   <h3 className="font-semibold">{order.dish?.name}</h3>
                   <p className="text-sm text-muted-foreground">
-                    {order.cook?.profile?.full_name} • الكمية: {order.quantity}
+                    {order.cook?.profile?.full_name} • {t('orders.quantity')}: {order.quantity}
                   </p>
                 </div>
-                <Badge className={status.color}>{status.label}</Badge>
+                <Badge className={statusColor}>{statusLabel}</Badge>
               </div>
               
               <div className="flex justify-between items-center">
-                <span className="font-bold text-orange-600">{order.total_amount} د.م</span>
+                <span className="font-bold text-orange-600">{order.total_amount} {t('common.currency')}</span>
                 <span className="text-xs text-muted-foreground">
                   {order.created_at ? new Date(order.created_at).toLocaleDateString("ar-MA") : ""}
                 </span>
@@ -224,7 +227,7 @@ const MyOrders = () => {
               {order.payment_status === "pending" && (
                 <div className="mt-3 p-2 bg-orange-50 rounded text-xs text-orange-700 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  الدفع نقداً عند الاستلام
+                  {t('orders.cashOnDelivery')}
                 </div>
               )}
 
@@ -241,7 +244,7 @@ const MyOrders = () => {
                   ) : (
                     <>
                       <CheckCircle className="h-4 w-4 ml-2" />
-                      تأكيد الاستلام والدفع
+                      {t('myOrders.confirmReceiptAndPayment')}
                     </>
                   )}
                 </Button>
@@ -251,7 +254,7 @@ const MyOrders = () => {
               {order.status === "completed" && (
                 <div className="mt-3 p-2 bg-green-50 rounded text-xs text-green-700 flex items-center gap-2">
                   <CheckCircle className="h-4 w-4" />
-                  تم إكمال الطلب بنجاح
+                  {t('myOrders.orderCompletedSuccessfully')}
                 </div>
               )}
             </div>
@@ -269,31 +272,31 @@ const MyOrders = () => {
         <div className="container mx-auto px-4 max-w-3xl">
           <div className="flex items-center gap-3 mb-6">
             <Package className="h-8 w-8 text-orange-500" />
-            <h1 className="text-2xl font-bold">طلباتي</h1>
+            <h1 className="text-2xl font-bold">{t('myOrders.title')}</h1>
           </div>
 
           {orders.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <Package className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                <h3 className="text-xl font-semibold mb-2">لا توجد طلبات</h3>
-                <p className="text-muted-foreground mb-4">لم تقم بأي طلبات بعد</p>
+                <h3 className="text-xl font-semibold mb-2">{t('myOrders.noOrders')}</h3>
+                <p className="text-muted-foreground mb-4">{t('myOrders.noOrdersYet')}</p>
                 <Button onClick={() => navigate("/home-cooking")} className="bg-orange-500 hover:bg-orange-600">
-                  تصفح الأطباق
+                  {t('myOrders.browseDishes')}
                 </Button>
               </CardContent>
             </Card>
           ) : (
             <Tabs defaultValue="active">
               <TabsList className="grid w-full grid-cols-2 mb-6">
-                <TabsTrigger value="active">نشطة ({activeOrders.length})</TabsTrigger>
-                <TabsTrigger value="completed">مكتملة ({completedOrders.length})</TabsTrigger>
+                <TabsTrigger value="active">{t('myOrders.active')} ({activeOrders.length})</TabsTrigger>
+                <TabsTrigger value="completed">{t('myOrders.completed')} ({completedOrders.length})</TabsTrigger>
               </TabsList>
 
               <TabsContent value="active">
                 {activeOrders.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    لا توجد طلبات نشطة
+                    {t('myOrders.noActiveOrders')}
                   </div>
                 ) : (
                   activeOrders.map(order => <OrderCard key={order.id} order={order} />)
@@ -303,7 +306,7 @@ const MyOrders = () => {
               <TabsContent value="completed">
                 {completedOrders.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    لا توجد طلبات مكتملة
+                    {t('myOrders.noCompletedOrders')}
                   </div>
                 ) : (
                   completedOrders.map(order => <OrderCard key={order.id} order={order} />)
@@ -322,8 +325,8 @@ const MyOrders = () => {
           setOrderToRate(null);
         }}
         onSubmit={handleRatingSubmit}
-        title="قيّم الطاهية"
-        description={`كيف كانت تجربتك مع ${orderToRate?.cook?.profile?.full_name || "الطاهية"}؟`}
+        title={t('myOrders.rateCook')}
+        description={t('myOrders.rateExperience', { name: orderToRate?.cook?.profile?.full_name || t('myOrders.theCook') })}
       />
 
       <Footer />

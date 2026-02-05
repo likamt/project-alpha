@@ -555,5 +555,34 @@
     "noDescription": "Pas de description",
     "notSpecified": "Non spécifié",
     "verifiedAccount": "Compte vérifié"
+  },
+  "myOrders": {
+    "title": "Mes Commandes",
+    "noOrders": "Aucune commande",
+    "noOrdersYet": "Vous n'avez pas encore passé de commande",
+    "browseDishes": "Parcourir les plats",
+    "active": "Actives",
+    "completed": "Terminées",
+    "noActiveOrders": "Aucune commande active",
+    "noCompletedOrders": "Aucune commande terminée",
+    "confirmReceiptAndPayment": "Confirmer réception et paiement",
+    "orderCompletedSuccessfully": "Commande terminée avec succès",
+    "rateCook": "Évaluer la cuisinière",
+    "rateExperience": "Comment était votre expérience avec {{name}} ?",
+    "theCook": "la cuisinière",
+    "thankYou": "Merci !",
+    "ratingSubmitted": "Votre évaluation a été envoyée avec succès",
+    "ratingError": "Échec de l'envoi de l'évaluation",
+    "confirmError": "Une erreur s'est produite lors de la confirmation",
+    "cookNotFound": "Informations de la cuisinière non trouvées",
+    "status": {
+      "pending": "En attente d'acceptation",
+      "accepted": "Acceptée",
+      "preparing": "En préparation",
+      "ready": "Prête à livrer",
+      "delivered": "Livrée",
+      "completed": "Terminée",
+      "cancelled": "Annulée"
+    }
   }
 }

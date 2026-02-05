@@ -555,5 +555,34 @@
     "noDescription": "No description",
     "notSpecified": "Not specified",
     "verifiedAccount": "Verified Account"
+  },
+  "myOrders": {
+    "title": "My Orders",
+    "noOrders": "No orders",
+    "noOrdersYet": "You haven't placed any orders yet",
+    "browseDishes": "Browse Dishes",
+    "active": "Active",
+    "completed": "Completed",
+    "noActiveOrders": "No active orders",
+    "noCompletedOrders": "No completed orders",
+    "confirmReceiptAndPayment": "Confirm Receipt and Payment",
+    "orderCompletedSuccessfully": "Order completed successfully",
+    "rateCook": "Rate the Cook",
+    "rateExperience": "How was your experience with {{name}}?",
+    "theCook": "the cook",
+    "thankYou": "Thank you!",
+    "ratingSubmitted": "Your rating was submitted successfully",
+    "ratingError": "Failed to submit rating",
+    "confirmError": "An error occurred during confirmation",
+    "cookNotFound": "Cook information not found",
+    "status": {
+      "pending": "Pending Acceptance",
+      "accepted": "Accepted",
+      "preparing": "Preparing",
+      "ready": "Ready for Delivery",
+      "delivered": "Delivered",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    }
   }
 }
